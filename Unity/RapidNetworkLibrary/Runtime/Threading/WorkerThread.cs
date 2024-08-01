@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics;
+using System.Threading;
 
 
 namespace RapidNetworkLibrary.Threading
@@ -20,18 +21,29 @@ namespace RapidNetworkLibrary.Threading
             thread.IsBackground = true;
             shouldRun = true;
 
-            thread.Start();
+            
         }
 
+        public int timeout = 0;
+        private Stopwatch ticker;
+        public void StartThread(int ticksPerSecond)
+        {
+            timeout = 1000/ticksPerSecond;
+            thread.Start();
+        }
         private void DoWork()
         {
+            
             Init();
             while (shouldRun == true)
             {
                 Consume();
                 Tick();
-                Thread.Sleep(8);
+                
             }
+            
+
+           
         }
         protected abstract void Init();
         protected abstract void Tick();

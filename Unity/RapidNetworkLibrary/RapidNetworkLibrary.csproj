@@ -7,6 +7,8 @@
     <Platforms>x64</Platforms>
     <Configurations>ServerDebug;ClientDebug</Configurations>
     <PlatformTarget>x64</PlatformTarget>
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	  <OutputPath>$(SolutionDir)\bin\$(MSBuildProjectName)\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ServerDebug|x64'">
@@ -22,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Runtime\Plugins\smmalloc.dll">
+    <None Update="Plugins\smmalloc.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -173,6 +173,7 @@ namespace RapidNetworkLibrary.Workers
                 var con = connectionHandler.GetConnection(data.sender);
                 con.ConnectionType = msg.type;
 #endif
+                MemoryHelper.Free(messageData);
 
             }
             else
@@ -205,9 +206,7 @@ namespace RapidNetworkLibrary.Workers
             Logger.Log(LogLevel.Info, "Attempting to allocate logic packet");
             var ptr = Marshal.AllocHGlobal(buffer.Length * Marshal.SizeOf<byte>());
             var span = new Span<byte>(ptr.ToPointer(), buffer.Length);
-
             buffer.ToSpan(ref span);
-
             Packet packet = default(Packet);
             packet.Create(ptr, buffer.Length, data.flags);
             packet.SetFreeCallback(packetFree);
@@ -217,6 +216,7 @@ namespace RapidNetworkLibrary.Workers
                 channel = data.channel,
                 payload = packet
             });
+
             MemoryHelper.Free(data.messageObjectPointer);
             buffer.Clear();
         }

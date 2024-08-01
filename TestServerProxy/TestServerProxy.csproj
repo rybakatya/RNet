@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <Configurations>ServerDebug;ClientDebug</Configurations>
     <Platforms>x64</Platforms>
+	  
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	<OutputPath>$(SolutionDir)\bin\$(MSBuildProjectName)\</OutputPath>
+
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ServerDebug|x64'">

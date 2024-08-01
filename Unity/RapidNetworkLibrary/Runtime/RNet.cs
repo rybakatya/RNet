@@ -22,6 +22,7 @@ namespace RapidNetworkLibrary
             SmmallocInstance smmalloc = new SmmallocInstance(8, 4 * 1024 * 1024);
             MemoryHelper.SetMalloc(smmalloc);
             workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers, smmalloc);
+            workers.socketWorker.StartThread(20);
             onInit += initAction;
 
         }
@@ -32,11 +33,11 @@ namespace RapidNetworkLibrary
             workers.gameWorker.Tick();
         }
         private static void OnSocketInit()
-        {
+        {       
             Logger.Log(LogLevel.Info, "Network Thread Initialized!");
+            
             workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers);
-
-
+            workers.logicWorker.StartThread(20);
         }
 
         private static void OnLogicInit()

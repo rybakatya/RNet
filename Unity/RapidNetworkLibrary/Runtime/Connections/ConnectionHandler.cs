@@ -1,5 +1,4 @@
 ﻿using ENet;
-using Newtonsoft.Json;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Serialization;
 using System;

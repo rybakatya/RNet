@@ -5,13 +5,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>ServerDebug</Configurations>
+    <Configurations>ServerDebug;ClientDebug</Configurations>
     <Platforms>x64</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ServerDebug|x64'">
-    <DefineConstants>$(DefineConstants);SERVER</DefineConstants>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ServerDebug|x64'">
+		<DefineConstants>$(DefineConstants);SERVER</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ClientDebug|x64'" />
 
   <ItemGroup>
     <ProjectReference Include="..\Unity\RapidNetworkLibrary\RapidNetworkLibrary.csproj" />

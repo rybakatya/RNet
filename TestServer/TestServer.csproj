@@ -6,13 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
-    <Configurations>ServerDebug</Configurations>
+    <Configurations>ServerDebug;ClientDebug</Configurations>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ServerDebug|x64'">
     <DefineConstants>$(DefineConstants);SERVER</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ClientDebug|x64'" />
 
   <ItemGroup>
     <ProjectReference Include="..\Unity\RapidNetworkLibrary\RapidNetworkLibrary.csproj" />

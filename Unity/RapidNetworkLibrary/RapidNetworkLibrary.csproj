@@ -18,15 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ENet\ENet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Plugins\smmalloc.dll">
+    <None Update="Runtime\Plugins\smmalloc.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,0 +1,8 @@
+{
+  "name": "com.rybakatya.rnet",
+  "version": "0.0.1",
+  "displayName": "RNet",
+  "dependencies": {
+    "com.rybakatya.enet": "0.0.1"
+  }
+}

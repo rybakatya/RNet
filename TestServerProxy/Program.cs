@@ -19,6 +19,8 @@ internal class Program
         }
 #endif
     }
+
+
 #if SERVER
     private static void onInit()
     {
@@ -54,6 +56,6 @@ internal class Program
             return ConnectionType.Server;
         return ConnectionType.Client;
     }
+#endif
 }
 
-#endif

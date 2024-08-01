@@ -9,14 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Plugins\" />
+    <Folder Include="Runtime\Plugins\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Plugins\enet.dll">
+    <None Update="Runtime\Plugins\enet.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Plugins\smmalloc.dll">
+    <None Update="Runtime\Plugins\smmalloc.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

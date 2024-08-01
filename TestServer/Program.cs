@@ -21,6 +21,8 @@ internal class Program
 #if SERVER
     private static ConnectionType DetermineConnectionType(string ip, ushort port)
     {
+        if(ip.Equals("127.0.0.1") && port == 7778)
+            return ConnectionType.Server;
         return ConnectionType.Client;
     }
 

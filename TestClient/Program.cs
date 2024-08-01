@@ -22,7 +22,7 @@ internal class Program
         RNet.InitializeClient(255);
         RNet.RegisterOnConnectedToServerEvent(LogicOnConnectedToServer, GameOnConnectedToServer);
 #endif
-        RNet.Connect("127.0.0.1", 7777);
+        RNet.Connect("127.0.0.1", 7778);
         isInit = true;
     }
 

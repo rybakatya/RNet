@@ -30,6 +30,9 @@ internal class Program
         RNet.RegisterOnServerConnectEvent(serverConnectLogicAction: LogicOnServerConnect);
 
         RNet.InitializeServer("127.0.0.1", 7778, 255, 2048);
+
+        RNet.Connect("127.0.0.1", 7777);
+        
     }
 
    

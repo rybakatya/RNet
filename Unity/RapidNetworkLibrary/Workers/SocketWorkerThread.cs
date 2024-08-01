@@ -62,8 +62,8 @@ namespace RapidNetworkLibrary.Workers
             enetHost = new Host();
 
             Address address = new Address();
-            address.SetHost("127.0.0.1");
-            address.Port = 7777;
+            address.SetHost(ip);
+            address.Port = port;
 
             
             enetHost.Create(address, maxConnections, channelLimit);

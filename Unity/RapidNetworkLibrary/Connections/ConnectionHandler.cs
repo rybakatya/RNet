@@ -84,7 +84,7 @@ namespace RapidNetworkLibrary.Connections
             var c = Connection.Create(peerID, connectionType, ip.ToString(), port);
             connections.Add(peerID, c);
 
-            if(connectionType == ConnectionType.Server || conType == ConnectionType.SubServer)
+            if(connectionType == ConnectionType.Server)
             {
                 if(workers.logicWorker.onConnectedToServer != null)
                     workers.logicWorker.onConnectedToServer(c);

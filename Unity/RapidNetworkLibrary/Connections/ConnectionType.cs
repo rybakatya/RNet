@@ -7,7 +7,6 @@ namespace RapidNetworkLibrary.Connections
     {
         Client,
         Server,
-        SubServer,
         Unknown
     }
 }

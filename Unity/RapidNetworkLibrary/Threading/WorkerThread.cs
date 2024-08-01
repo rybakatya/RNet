@@ -30,6 +30,7 @@ namespace RapidNetworkLibrary.Threading
             {
                 Consume();
                 Tick();
+                Thread.Sleep(8);
             }
         }
         protected abstract void Init();

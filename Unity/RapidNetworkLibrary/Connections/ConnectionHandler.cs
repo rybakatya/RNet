@@ -75,7 +75,7 @@ namespace RapidNetworkLibrary.Connections
                     workers.logicWorker.onClientConnected(c);
             }
 
-            else if(conType == ConnectionType.Server || conType == ConnectionType.SubServer)
+            else if(conType == ConnectionType.Server)
             {
                 workers.logicWorker.onServerConnected(c);
             }

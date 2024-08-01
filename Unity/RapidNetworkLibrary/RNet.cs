@@ -19,7 +19,7 @@ namespace RapidNetworkLibrary
         public static void Init(Action initAction, ConnectionType conType)
         {
             connectionType = conType;
-            SmmallocInstance smmalloc = new SmmallocInstance(8, 4 * 512 * 512);
+            SmmallocInstance smmalloc = new SmmallocInstance(8, 4 * 1024 * 1024);
             MemoryHelper.SetMalloc(smmalloc);
             workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers, smmalloc);
             onInit += initAction;

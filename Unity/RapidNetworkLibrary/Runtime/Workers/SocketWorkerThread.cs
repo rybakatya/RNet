@@ -16,7 +16,7 @@ namespace RapidNetworkLibrary.Workers
 
         private Host enetHost;
         internal SmmallocInstance smmalloc;
-        int test;
+
 
         public Action onInit;
 

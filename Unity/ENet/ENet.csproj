@@ -6,9 +6,45 @@
     <Platforms>x64</Platforms>
     <Configurations>Debug;ServerDebug;ClientDebug</Configurations>
     <PlatformTarget>x64</PlatformTarget>
+	  <IntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</IntermediateOutputPath>
+	  <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	  <OutputPath>$(SolutionDir)\bin\$(MSBuildProjectName)\</OutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="bin.meta" />
+    <None Remove="ENet.csproj.meta" />
+    <None Remove="obj.meta" />
+    <None Remove="package.json.meta" />
+    <None Remove="Plugins.meta" />
+    <None Remove="Plugins\enet.dll.meta" />
+    <None Remove="Plugins\smmalloc.dll.meta" />
+    <None Remove="Runtime.meta" />
+    <None Remove="Runtime\Address.cs.meta" />
+    <None Remove="Runtime\ArrayPool.cs.meta" />
+    <None Remove="Runtime\Callbacks.cs.meta" />
+    <None Remove="Runtime\ENetAddress.cs.meta" />
+    <None Remove="Runtime\ENetCallbacks.cs.meta" />
+    <None Remove="Runtime\ENetEvent.cs.meta" />
+    <None Remove="Runtime\Event.cs.meta" />
+    <None Remove="Runtime\EventType.cs.meta" />
+    <None Remove="Runtime\Extensions.cs.meta" />
+    <None Remove="Runtime\Host.cs.meta" />
+    <None Remove="Runtime\Library.cs.meta" />
+    <None Remove="Runtime\Native.cs.meta" />
+    <None Remove="Runtime\Packet.cs.meta" />
+    <None Remove="Runtime\PacketFlags.cs.meta" />
+    <None Remove="Runtime\Peer.cs.meta" />
+    <None Remove="Runtime\PeerState.cs.meta" />
+    <None Remove="Runtime\rybakatya.enet.asmdef.meta" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Plugins\" />

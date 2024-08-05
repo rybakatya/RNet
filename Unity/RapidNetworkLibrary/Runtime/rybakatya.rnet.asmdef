@@ -1,0 +1,16 @@
+{
+    "name": "rybakatya.rnet",
+    "rootNamespace": "RapidNetworkLibrary",
+    "references": [
+        "GUID:1a5cc8507142eba448db8a1952b2199e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

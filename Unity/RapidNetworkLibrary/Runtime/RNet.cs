@@ -3,10 +3,13 @@ using System.Runtime.InteropServices;
 using ENet;
 using RapidNetworkLibrary.Connections;
 using RapidNetworkLibrary.Logging;
+using RapidNetworkLibrary.Runtime.Memory;
+using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Workers;
-using Smmalloc;
-
+#if ENABLE_MONO || ENABLE_IL2CPP
+using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace RapidNetworkLibrary
 {
@@ -16,8 +19,9 @@ namespace RapidNetworkLibrary
 
         private static Action onInit;
         internal static ConnectionType connectionType;
-        public static void Init(Action initAction, ConnectionType conType)
+        public unsafe static void Init(Action initAction, ConnectionType conType) 
         {
+            
             connectionType = conType;
             SmmallocInstance smmalloc = new SmmallocInstance(8, 4 * 1024 * 1024);
             MemoryHelper.SetMalloc(smmalloc);
@@ -25,6 +29,13 @@ namespace RapidNetworkLibrary
             workers.socketWorker.StartThread(20);
             onInit += initAction;
 
+        }
+
+        public static void TearDown()
+        {
+            workers.socketWorker.OnDestroy();
+            workers.logicWorker.OnDestroy();
+            workers.gameWorker.OnDestroy();
         }
 
 
@@ -36,7 +47,7 @@ namespace RapidNetworkLibrary
         {       
             Logger.Log(LogLevel.Info, "Network Thread Initialized!");
             
-            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers);
+            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers, workers.socketWorker.smmalloc);
             workers.logicWorker.StartThread(20);
         }
 
@@ -44,6 +55,7 @@ namespace RapidNetworkLibrary
         {
             Logger.Log(LogLevel.Info, "Logic Thread Initialized!");
             workers.gameWorker = new GameWorker();
+            workers.gameWorker.shouldRun = true;
             Logger.Log(LogLevel.Info, "Main Thread Initialized!");
             Logger.Log(LogLevel.Info, "RNetInitialized!");
             if (onInit != null)
@@ -201,15 +213,6 @@ namespace RapidNetworkLibrary
                 workers.gameWorker.onConnectedToServer += gameConnectedToServerAction;
         }
 #endif
-    }
-
-    public struct SerializeNetworkMessageThreadMessage
-    {
-        public uint target;
-        public ushort id;
-        public byte channel;
-        public PacketFlags flags;
-        public IntPtr messageObjectPointer;
     }
 
 

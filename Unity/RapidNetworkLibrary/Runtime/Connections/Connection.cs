@@ -12,7 +12,7 @@ namespace RapidNetworkLibrary.Connections
 
         private ulong bytesSent;
         private ulong bytesReceived;
-        private NativeString ipAddress;
+        internal NativeString ipAddress;
         private uint lastReceiveTime;
         private uint lastSendTime;
         private uint lastRoundTripTime;
@@ -22,7 +22,7 @@ namespace RapidNetworkLibrary.Connections
 
         private ushort port;
 
-        public static Connection Create(uint id, ConnectionType type, string ip, ushort port)
+        public static Connection Create(uint id, ConnectionType type, NativeString ip, ushort port)
         {
             return new Connection(id, type, ip, port);
         }
@@ -31,18 +31,18 @@ namespace RapidNetworkLibrary.Connections
         {
             return new Connection(connection);
         }
-
+        
         public static void Destroy(Connection connection)
         {
             connection.ipAddress.Free();
         }
-        private Connection(uint p, ConnectionType type, string ip, ushort prt)
+        private Connection(uint p, ConnectionType type, NativeString ip, ushort prt)
         {
             peer = p;
             connectionType = type;
             bytesSent = 0;
             bytesReceived = 0;
-            ipAddress = new NativeString(ip);
+            ipAddress = ip;
             lastReceiveTime = 0;
             lastSendTime = 0;
             lastRoundTripTime = 0;
@@ -64,7 +64,7 @@ namespace RapidNetworkLibrary.Connections
 
             bytesSent = con.bytesSent;
             bytesReceived = con.bytesReceived;
-            ipAddress = new NativeString(con.ipAddress.ToString());
+            ipAddress = con.ipAddress;
             lastReceiveTime = con.lastReceiveTime;
             lastSendTime = con.LastSendTime;
             lastRoundTripTime = con.LastRoundTripTime;

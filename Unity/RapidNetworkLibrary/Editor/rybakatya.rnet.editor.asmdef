@@ -1,0 +1,16 @@
+{
+    "name": "rybakatya.rnet.editor",
+    "rootNamespace": "RapidNetworkLibrary.Editor",
+    "references": [
+        "GUID:8c766e847df409245acbd629d0df0f87"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

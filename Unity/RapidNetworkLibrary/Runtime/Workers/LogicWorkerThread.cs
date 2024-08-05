@@ -10,9 +10,14 @@ using RapidNetworkLibrary.Serialization;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 
 
+using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
+using RapidNetworkLibrary.Runtime.Zones;
+using RapidNetworkLibrary.Runtime.Memory;
+
+
 namespace RapidNetworkLibrary.Workers
 {
-    public delegate ConnectionType GetConnectionTypeDelegate(string ip, ushort port);
+    public delegate ConnectionType GetConnectionTypeDelegate(RNetIPAddress address);
     internal class LogicWorkerThread : WorkerThread
     {
 
@@ -37,9 +42,11 @@ namespace RapidNetworkLibrary.Workers
         private WorkerCollection workers;
 
         private PacketFreeCallback packetFree;
-
-        public LogicWorkerThread(Action logicInitAction, WorkerCollection wrk)
+        private SmmallocInstance smmalloc;
+        public LogicWorkerThread(Action logicInitAction, WorkerCollection wrk, SmmallocInstance malloc)
         {
+            smmalloc = malloc;
+           
             workers = wrk;
 
             onLogicInit += logicInitAction;           
@@ -78,6 +85,8 @@ namespace RapidNetworkLibrary.Workers
 
         protected override void Init()
         {
+            shouldRun = true;
+            smmalloc.CreateThreadCache(4 * 1024, CacheWarmupOptions.Hot);
             packetFree += onPacketFree;
             while(workers == null)
             {
@@ -106,7 +115,7 @@ namespace RapidNetworkLibrary.Workers
                 case WorkerThreadMessageID.SendConnection:
 #if SERVER
                     var msgData = MemoryHelper.Read<SendConnectionDataThreadMessage>(data);
-                    connectionHandler.HandleSocketConnection(msgData.id, msgData.ip, msgData.port);
+                    connectionHandler.HandleSocketConnection(msgData.id,msgData.ip, msgData.port);
 #endif
                     break;
 
@@ -168,7 +177,7 @@ namespace RapidNetworkLibrary.Workers
                 var messageData = serializers[msgID].Deserialize(buffer);
                 var msg = MemoryHelper.Read<InformConnectionType>(messageData);
 #if CLIENT
-                connectionHandler.HandleSocketConnection(data.sender, msg.type, new NativeString(data.ip.ToString()), data.port);
+                connectionHandler.HandleSocketConnection(data.sender, msg.type, data.ip, data.port);
 #elif SERVER
                 var con = connectionHandler.GetConnection(data.sender);
                 con.ConnectionType = msg.type;
@@ -190,7 +199,7 @@ namespace RapidNetworkLibrary.Workers
             }
 
             data.packet.Dispose();
-            data.ip.Free();
+            //data.ip.Free();
             buffer.Clear();
 
         }
@@ -205,6 +214,7 @@ namespace RapidNetworkLibrary.Workers
 
             Logger.Log(LogLevel.Info, "Attempting to allocate logic packet");
             var ptr = Marshal.AllocHGlobal(buffer.Length * Marshal.SizeOf<byte>());
+            //var ptr = (IntPtr)UnsafeUtility.MallocTracked(buffer.Length * sizeof(byte), 0, Unity.Collections.Allocator.Persistent, 0);
             var span = new Span<byte>(ptr.ToPointer(), buffer.Length);
             buffer.ToSpan(ref span);
             Packet packet = default(Packet);
@@ -220,10 +230,19 @@ namespace RapidNetworkLibrary.Workers
             MemoryHelper.Free(data.messageObjectPointer);
             buffer.Clear();
         }
-        private void onPacketFree(Packet packet)
+        private unsafe void onPacketFree(Packet packet)
         {
             Logger.Log(LogLevel.Warning, "Freeing packet!");
             Marshal.FreeHGlobal(packet.Data);
+            //UnsafeUtility.FreeTracked(packet.Data.ToPointer(), Unity.Collections.Allocator.Persistent);
+        }
+
+        protected override void Destroy()
+        {
+            
+            connectionHandler.Destroy();
+            smmalloc.DestroyThreadCache();
+
         }
     }
 }

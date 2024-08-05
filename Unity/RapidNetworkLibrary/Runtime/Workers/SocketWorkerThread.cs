@@ -5,7 +5,7 @@ using RapidNetworkLibrary.Threading;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Logging;
 using System.Collections.Generic;
-using Smmalloc;
+using RapidNetworkLibrary.Runtime.Memory;
 
 
 namespace RapidNetworkLibrary.Workers
@@ -15,7 +15,7 @@ namespace RapidNetworkLibrary.Workers
         private WorkerCollection workers;
 
         private Host enetHost;
-        private SmmallocInstance smmalloc;
+        internal SmmallocInstance smmalloc;
 
 
         public Action onInit;
@@ -30,6 +30,7 @@ namespace RapidNetworkLibrary.Workers
         }
         protected override void Init()
         {
+            shouldRun = true;
             smmalloc.CreateThreadCache(4 * 1024, CacheWarmupOptions.Hot);
             InitializeENet();
 
@@ -134,7 +135,7 @@ namespace RapidNetworkLibrary.Workers
                     {
                         packet = e.Packet,
                         sender = e.Peer.ID,
-                        ip = new NativeString(e.Peer.IP.ToString()),
+                        //ip = new NativeString(e.Peer.IP.ToString()),
                         port = e.Peer.Port
                     });
                   
@@ -241,7 +242,16 @@ namespace RapidNetworkLibrary.Workers
             InitializeENetServer(initData.ip.ToString(), initData.port, initData.maxConnections, initData.maxChannels);
             initData.ip.Free();
         }
+
+
 #endif
+
+        protected override void Destroy()
+        {
+            enetHost.Flush();
+            smmalloc.DestroyThreadCache();
+            ENet.Library.Deinitialize();
+        }
         AllocCallback OnMemoryAllocate = (size) =>
         {
             return Marshal.AllocHGlobal(size);

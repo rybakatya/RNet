@@ -47,11 +47,13 @@ namespace RapidNetworkLibrary.Threading
         }
         protected abstract void Init();
         protected abstract void Tick();
-
+        protected abstract void Destroy();
         internal override void OnDestroy()
         {
+            Flush();
+            Destroy();
             shouldRun = false;
-            thread.Join();
+            thread.Abort();
         }
     }
 }

@@ -7,6 +7,8 @@
     <Platforms>x64</Platforms>
     <Configurations>ServerDebug;ClientDebug</Configurations>
     <PlatformTarget>x64</PlatformTarget>
+	  <IntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</IntermediateOutputPath>
+	  <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	  <OutputPath>$(SolutionDir)\bin\$(MSBuildProjectName)\</OutputPath>
   </PropertyGroup>
@@ -18,6 +20,117 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ClientDebug|x64'">
     <DefineConstants>$(DefineConstants);CLIENT</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="bin.meta" />
+    <None Remove="Editor.meta" />
+    <None Remove="Editor\New Folder.meta" />
+    <None Remove="Editor\Plugins.meta" />
+    <None Remove="Editor\Plugins\Newtonsoft.Json.dll.meta" />
+    <None Remove="Editor\Replication.meta" />
+    <None Remove="Editor\Replication\RNetEntityDatabase.cs.meta" />
+    <None Remove="Editor\RNetSettingsWindow.cs.meta" />
+    <None Remove="Editor\rybakatya.rnet.editor.asmdef.meta" />
+    <None Remove="obj.meta" />
+    <None Remove="package.json.meta" />
+    <None Remove="Plugins.meta" />
+    <None Remove="Plugins\smmalloc.dll.meta" />
+    <None Remove="RapidNetworkLibrary.csproj.meta" />
+    <None Remove="Runtime.meta" />
+    <None Remove="Runtime\Buffers.meta" />
+    <None Remove="Runtime\Buffers\ArrayPool.cs.meta" />
+    <None Remove="Runtime\Buffers\ArrayPoolEventSource.cs.meta" />
+    <None Remove="Runtime\Buffers\DefaultArrayPool.cs.meta" />
+    <None Remove="Runtime\Buffers\DefaultArrayPoolBucket.cs.meta" />
+    <None Remove="Runtime\Buffers\Utilities.cs.meta" />
+    <None Remove="Runtime\Connections.meta" />
+    <None Remove="Runtime\Connections\Connection.cs.meta" />
+    <None Remove="Runtime\Connections\ConnectionHandler.cs.meta" />
+    <None Remove="Runtime\Connections\ConnectionType.cs.meta" />
+    <None Remove="Runtime\Connections\InformConnectionSerializer.cs.meta" />
+    <None Remove="Runtime\Connections\InformConnectionType.cs.meta" />
+    <None Remove="Runtime\Logging.meta" />
+    <None Remove="Runtime\Logging\Logger.cs.meta" />
+    <None Remove="Runtime\Logging\LogLevel.cs.meta" />
+    <None Remove="Runtime\Memory.meta" />
+    <None Remove="Runtime\Memory\MemoryHelper.cs.meta" />
+    <None Remove="Runtime\Memory\Smmalloc.cs.meta" />
+    <None Remove="Runtime\NativeString.cs.meta" />
+    <None Remove="Runtime\Replication.meta" />
+    <None Remove="Runtime\Replication\Culling.meta" />
+    <None Remove="Runtime\Replication\Culling\RNetObserver.cs.meta" />
+    <None Remove="Runtime\Replication\RNetEntityDatabase.cs.meta" />
+    <None Remove="Runtime\RNet.cs.meta" />
+    <None Remove="Runtime\RNetSettings.cs.meta" />
+    <None Remove="Runtime\rybakatya.rnet.asmdef.meta" />
+    <None Remove="Runtime\Serialization.meta" />
+    <None Remove="Runtime\Serialization\BitBuffer.cs.meta" />
+    <None Remove="Runtime\Serialization\BoundedRange.cs.meta" />
+    <None Remove="Runtime\Serialization\BufferPool.cs.meta" />
+    <None Remove="Runtime\Serialization\HalfPrecision.cs.meta" />
+    <None Remove="Runtime\Serialization\IMessageObject.cs.meta" />
+    <None Remove="Runtime\Serialization\NetworkMessages.cs.meta" />
+    <None Remove="Runtime\Serialization\Serializer.cs.meta" />
+    <None Remove="Runtime\Serialization\SerializerAttribute.cs.meta" />
+    <None Remove="Runtime\Serialization\SmallestThree.cs.meta" />
+    <None Remove="Runtime\Threading.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Interfaces.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Interfaces\IConsumerQueue.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Interfaces\IProducerConsumerQueue.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Interfaces\IProducerQueue.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\LocklessQueues.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\LocklessQueues\HeadAndTail.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\LocklessQueues\MPMCQueue.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\LocklessQueues\MPSCQueue.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\LocklessQueues\SPSCQueue.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Sets.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Sets\ConcurrentHashSet.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Sets\HashHelpers.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Utils.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\Utils\MathUtils.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\View.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\View\ICollectionDebugView.cs.meta" />
+    <None Remove="Runtime\Threading\Lockless-Queue\View\IProducerConsumerCollectionDebugView.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\ConnectToSocketThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\DeserializeNetworkMessageThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\InitializeServer.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\NetworkMessageDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\PacketDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\PeerDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\SendConnectionDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\SerializeNetworkMessageThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadMessages\WorkerThreadMessageID.cs.meta" />
+    <None Remove="Runtime\Threading\Worker.cs.meta" />
+    <None Remove="Runtime\Threading\WorkerThread.cs.meta" />
+    <None Remove="Runtime\Threading\WorkerThreadMessageData.cs.meta" />
+    <None Remove="Runtime\Workers.cs.meta" />
+    <None Remove="Runtime\Workers.meta" />
+    <None Remove="Runtime\Workers\GameWorker.cs.meta" />
+    <None Remove="Runtime\Workers\LogicWorkerThread.cs.meta" />
+    <None Remove="Runtime\Workers\SocketWorkerThread.cs.meta" />
+    <None Remove="Runtime\Zones.meta" />
+    <None Remove="Runtime\Zones\Cell.cs.meta" />
+    <None Remove="Runtime\Zones\CellServerConnection.cs.meta" />
+    <None Remove="Runtime\Zones\CellServerManager.cs.meta" />
+    <None Remove="Runtime\Zones\GameWorkerHandler.cs.meta" />
+    <None Remove="Runtime\Zones\LogicWorkerHandler.cs.meta" />
+    <None Remove="Runtime\Zones\MapSettings.cs.meta" />
+    <None Remove="Runtime\Zones\NetworkWorkerHandler.cs.meta" />
+    <None Remove="Runtime\Zones\Rect.cs.meta" />
+    <None Remove="Runtime\Zones\RNetIPAddress.cs.meta" />
+    <None Remove="Runtime\Zones\ServerGrid.cs.meta" />
+    <None Remove="Runtime\Zones\ServerSpatialHash.cs.meta" />
+    <None Remove="Runtime\Zones\SpatialHash.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer.cs.meta" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ENet\ENet.csproj" />

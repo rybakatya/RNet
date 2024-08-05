@@ -3,6 +3,7 @@ using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Threading;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using System;
+using System.Diagnostics;
 
 
 namespace RapidNetworkLibrary.Workers
@@ -12,6 +13,8 @@ namespace RapidNetworkLibrary.Workers
 #if SERVER
         public Action<Connection> onClientConnected;
         public Action<Connection> onServerConnected;
+
+        public Action<uint> test;
 #elif CLIENT
         public Action<Connection> onConnectedToServer;
 #endif
@@ -24,8 +27,12 @@ namespace RapidNetworkLibrary.Workers
             switch (message)
             {
                 case WorkerThreadMessageID.SendConnection:
-                    var connection = MemoryHelper.Read<Connection>(data);
+                    var connection = MemoryHelper.Read<SendConnectionDataThreadMessage>(data);
+                    Logger.Log(LogLevel.Warning, connection.id.ToString());
 #if SERVER
+                    if (onServerConnected != null)
+                        onServerConnected(new Connection());
+                    /*
                     if (connection.ConnectionType == ConnectionType.Client)
                     {
                         if (onClientConnected != null)
@@ -35,12 +42,12 @@ namespace RapidNetworkLibrary.Workers
                     {
                         if(onServerConnected != null)
                             onServerConnected(connection);
-                    }
+                    }*/
 #elif CLIENT
                     if(onConnectedToServer != null)
-                        onConnectedToServer(connection);
+                        onConnectedToServer(new Connection());
 #endif
-
+                    
                     break;
 
 

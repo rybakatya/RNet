@@ -11,7 +11,7 @@ namespace RapidNetworkLibrary.Logging
             switch (level)
             {
                 case LogLevel.Info:
-#if UNITY
+#if ENABLE_MONO || ENABLE_IL2CPP
                     UnityEngine.Debug.Log(msg);
 #else
                     Console.WriteLine(msg);
@@ -19,7 +19,7 @@ namespace RapidNetworkLibrary.Logging
                     break;
 
                 case LogLevel.Warning:
-#if UNITY
+#if ENABLE_MONO || ENABLE_IL2CPP
                     UnityEngine.Debug.LogWarning(msg);
 #else
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -29,7 +29,7 @@ namespace RapidNetworkLibrary.Logging
                     break;
 
                 case LogLevel.Error:
-#if UNITY
+#if ENABLE_MONO || ENABLE_IL2CPP
                     UnityEngine.Debug.LogError(msg);
 #else
                     Console.ForegroundColor = ConsoleColor.Red;

@@ -6,8 +6,9 @@ namespace RapidNetworkLibrary.Connections
     public enum ConnectionType
     {
         Client,
+        CellServer,
         Server,
-        Unknown
+        ZoneServer
     }
 }
 

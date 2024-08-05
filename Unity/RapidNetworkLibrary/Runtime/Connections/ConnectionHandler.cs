@@ -1,6 +1,8 @@
 ﻿using ENet;
 using RapidNetworkLibrary.Logging;
+using RapidNetworkLibrary.Runtime.Zones;
 using RapidNetworkLibrary.Serialization;
+using RapidNetworkLibrary.Threading.ThreadMessages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -52,14 +54,14 @@ namespace RapidNetworkLibrary.Connections
             
             if (workers.logicWorker.getConnectionType != null)
             {
-               conType = workers.logicWorker.getConnectionType(ip.ToString(), port);
+                conType = workers.logicWorker.getConnectionType(new RNetIPAddress(ip.ToString(), port));
             }
             else
             {
                 Logger.Log(LogLevel.Exception, "Must call RNet.RegisterGetConnectionTypeEvent before accepting any connections when building as a server.");
                 return;
             }
-            var c = Connection.Create(peerID, conType, ip.ToString(), port);
+            var c = Connection.Create(peerID, conType, ip, port);
             
             RNet.SendReliable(c, NetworkMessages.informConnectionType, new InformConnectionType()
             {
@@ -80,7 +82,7 @@ namespace RapidNetworkLibrary.Connections
             }
 #elif CLIENT
             conType = connectionType;
-            var c = Connection.Create(peerID, connectionType, ip.ToString(), port);
+            var c = Connection.Create(peerID, connectionType, ip, port);
             connections.Add(peerID, c);
 
             if(connectionType == ConnectionType.Server)
@@ -89,9 +91,9 @@ namespace RapidNetworkLibrary.Connections
                     workers.logicWorker.onConnectedToServer(c);
             }
 #endif
-            ip.Free();
+           
 
-            workers.gameWorker.Enqueue(WorkerThreadMessageID.SendConnection, c);
+            workers.gameWorker.Enqueue(WorkerThreadMessageID.SendConnection, new SendConnectionDataThreadMessage() { id = c.ID});
         }
 
         public void HandleDisconnect(uint peer)
@@ -112,6 +114,14 @@ namespace RapidNetworkLibrary.Connections
         {
             Connection.Destroy(connections[id]);
             connections[id] = con;
+        }
+
+        internal void Destroy()
+        {
+            foreach(var kvp in connections)
+            {
+                kvp.Value.ipAddress.Free();
+            }
         }
     }
 }

@@ -26,14 +26,15 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace Smmalloc {
-	public enum CacheWarmupOptions {
+namespace RapidNetworkLibrary.Runtime.Memory
+{
+	internal enum CacheWarmupOptions {
 		Cold = 0,
 		Warm = 1,
 		Hot = 2
 	}
 
-	public class SmmallocInstance : IDisposable {
+	internal class SmmallocInstance : IDisposable {
 		private IntPtr nativeAllocator;
 		internal readonly uint allocationLimit;
 
@@ -76,16 +77,16 @@ namespace Smmalloc {
 			Native.sm_allocator_thread_cache_destroy(nativeAllocator);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public IntPtr Malloc(int bytesCount) {
 			return Malloc(bytesCount, 0);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public IntPtr Malloc(int bytesCount, int alignment) {
 			if (bytesCount == 0 || bytesCount < 0 || bytesCount > allocationLimit)
 				throw new ArgumentOutOfRangeException();
@@ -93,9 +94,9 @@ namespace Smmalloc {
 			return Native.sm_malloc(nativeAllocator, (IntPtr)bytesCount, (IntPtr)alignment);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public void Free(IntPtr memory) {
 			if (memory == IntPtr.Zero)
 				throw new ArgumentNullException("memory");
@@ -103,9 +104,9 @@ namespace Smmalloc {
 			Native.sm_free(nativeAllocator, memory);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public void Free(IntPtr[] batch) {
 			if (batch == null)
 				throw new ArgumentNullException("batch");
@@ -113,9 +114,9 @@ namespace Smmalloc {
 			Native.sm_free_batch(nativeAllocator, batch, (IntPtr)batch.Length);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public void Free(IntPtr batch, int length) {
 			if (batch == IntPtr.Zero)
 				throw new ArgumentNullException("batch");
@@ -123,16 +124,16 @@ namespace Smmalloc {
 			Native.sm_free_batch(nativeAllocator, batch, (IntPtr)length);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public IntPtr Realloc(IntPtr memory, int bytesCount) {
 			return Realloc(memory, bytesCount, 0);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public IntPtr Realloc(IntPtr memory, int bytesCount, int alignment) {
 			if (memory == IntPtr.Zero)
 				throw new ArgumentNullException("memory");
@@ -143,9 +144,9 @@ namespace Smmalloc {
 			return Native.sm_realloc(nativeAllocator, memory, (IntPtr)bytesCount, (IntPtr)alignment);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public int Size(IntPtr memory) {
 			if (memory == IntPtr.Zero)
 				throw new ArgumentNullException("memory");
@@ -153,9 +154,9 @@ namespace Smmalloc {
 			return (int)Native.sm_msize(nativeAllocator, memory);
 		}
 
-		#if SMMALLOC_INLINING
+		
 			[MethodImpl(256)]
-		#endif
+		
 		public int Bucket(IntPtr memory) {
 			if (memory == IntPtr.Zero)
 				throw new ArgumentNullException("memory");

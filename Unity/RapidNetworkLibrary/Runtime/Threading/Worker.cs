@@ -7,16 +7,13 @@ namespace RapidNetworkLibrary.Threading
 {
     public abstract class Worker
     {
-        protected bool shouldRun;
+        internal bool shouldRun;
         internal MPSCQueue<IntPtr> messageQueue = new MPSCQueue<IntPtr>(1024);
         internal abstract void OnConsume(WorkerThreadMessageID message, IntPtr data);
 
         internal abstract void OnDestroy();
 
-        ~Worker()
-        {
-            OnDestroy();
-        }
+        
 
         internal void Enqueue(WorkerThreadMessageID threadMessageID)
         {
@@ -47,7 +44,7 @@ namespace RapidNetworkLibrary.Threading
         internal unsafe void Consume()
         {
             var ptr = IntPtr.Zero;
-            while (messageQueue.TryDequeue(out ptr) == true)
+            while (messageQueue.TryDequeue(out ptr) == true && shouldRun == true)
             {
                 var header = MemoryHelper.Read<WorkerThreadHeader>(ptr);
                 OnConsume(header.messageID, header.data);
@@ -56,8 +53,10 @@ namespace RapidNetworkLibrary.Threading
             }
         }
 
-        protected void Flush()
+        internal void Flush()
         {
+            
+            
             var ptr = IntPtr.Zero;
             while (messageQueue.TryDequeue(out ptr) == true)
             {

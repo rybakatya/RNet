@@ -104,4 +104,9 @@ public static class MemoryHelper
     {
         smalloc = malloc;
     }
+
+    internal static void FreeMalloc()
+    {
+        smalloc.Dispose();
+    }
 }

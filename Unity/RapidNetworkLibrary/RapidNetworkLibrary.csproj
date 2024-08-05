@@ -118,8 +118,12 @@
     <None Remove="Runtime\Workers\SocketWorkerThread.cs.meta" />
     <None Remove="Runtime\Zones.meta" />
     <None Remove="Runtime\Zones\Cell.cs.meta" />
+    <None Remove="Runtime\Zones\CellServer.meta" />
     <None Remove="Runtime\Zones\CellServerConnection.cs.meta" />
     <None Remove="Runtime\Zones\CellServerManager.cs.meta" />
+    <None Remove="Runtime\Zones\CellServer\CellServer.cs.meta" />
+    <None Remove="Runtime\Zones\CellServer\CellServerConnection.cs.meta" />
+    <None Remove="Runtime\Zones\CellServer\CellServerManager.cs.meta" />
     <None Remove="Runtime\Zones\GameWorkerHandler.cs.meta" />
     <None Remove="Runtime\Zones\LogicWorkerHandler.cs.meta" />
     <None Remove="Runtime\Zones\MapSettings.cs.meta" />
@@ -130,6 +134,13 @@
     <None Remove="Runtime\Zones\ServerSpatialHash.cs.meta" />
     <None Remove="Runtime\Zones\SpatialHash.cs.meta" />
     <None Remove="Runtime\Zones\ZoneServer.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer.meta" />
+    <None Remove="Runtime\Zones\ZoneServer\GameWorkerHandler.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer\LogicWorkerHandler.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer\NetworkWorkerHandler.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer\Rect.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer\ServerSpatialHash.cs.meta" />
+    <None Remove="Runtime\Zones\ZoneServer\ZoneServer.cs.meta" />
   </ItemGroup>
 
   <ItemGroup>

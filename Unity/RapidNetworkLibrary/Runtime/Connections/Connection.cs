@@ -106,7 +106,20 @@ namespace RapidNetworkLibrary.Connections
             return peer == other.peer;
         }
 
+        public override int GetHashCode()
+        {
+            return (int)ID;
+        }
 
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override string ToString()
+        {
+            return "{ Connection : " + ID;
+        }
     }
 }
 

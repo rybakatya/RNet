@@ -14,14 +14,14 @@ namespace RapidNetworkLibrary.Runtime.Zones
         public ushort maxConnections;
         public List<RNetIPAddress> cellServers;
     }
-    public abstract class ZoneServer
+    public abstract class ZoneServerBase
     {       
         private GameWorkerHandler _gameWorkerHandler;
 
         private List<RNetIPAddress> cellServerWhiteList = new List<RNetIPAddress>();
         protected readonly ZoneServerData _serverData;
         protected readonly MapSettings _mapSettings;
-        public ZoneServer(ZoneServerData serverData, MapSettings mapSettings)
+        public ZoneServerBase(ZoneServerData serverData, MapSettings mapSettings)
         {
             _serverData = serverData;
             _mapSettings = mapSettings;

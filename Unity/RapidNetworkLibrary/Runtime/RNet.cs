@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using ENet;
 using RapidNetworkLibrary.Connections;
 using RapidNetworkLibrary.Logging;
@@ -36,6 +35,7 @@ namespace RapidNetworkLibrary
             workers.socketWorker.OnDestroy();
             workers.logicWorker.OnDestroy();
             workers.gameWorker.OnDestroy();
+            MemoryHelper.FreeMalloc();
         }
 
 

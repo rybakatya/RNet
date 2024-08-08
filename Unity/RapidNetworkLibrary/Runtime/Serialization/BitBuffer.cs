@@ -40,7 +40,6 @@
  */
 
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -95,13 +94,6 @@ namespace RapidNetworkLibrary.Serialization
         [MethodImpl(256)]
         public BitBuffer Add(int numBits, uint value)
         {
-#if ENABLE_MONO || ENABLE_IL2CPP
-				Assert.IsFalse(numBits < 0); // Pushing negative bits
-				Assert.IsFalse(numBits > 32); // Pushing too many bits
-#else
-            Debug.Assert(!(numBits < 0));
-            Debug.Assert(!(numBits > 32));
-#endif
 
             int index = nextPosition >> 5;
             int used = nextPosition & 0x0000001F;
@@ -133,13 +125,7 @@ namespace RapidNetworkLibrary.Serialization
         [MethodImpl(256)]
         public uint Peek(int numBits)
         {
-#if ENABLE_MONO || ENABLE_IL2CPP
-				Assert.IsFalse(numBits < 0); // Pushing negative bits
-				Assert.IsFalse(numBits > 32); // Pushing too many bits
-#else
-            Debug.Assert(!(numBits < 0));
-            Debug.Assert(!(numBits > 32));
-#endif
+
 
             int index = readPosition >> 5;
             int used = readPosition & 0x0000001F;

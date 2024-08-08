@@ -1,5 +1,6 @@
 ﻿using LocklessQueue.Queues;
 using RapidNetworkLibrary.Logging;
+using RapidNetworkLibrary.Memory;
 using System;
 
 

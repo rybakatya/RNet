@@ -11,13 +11,47 @@ using RapidNetworkLibrary.Threading.ThreadMessages;
 
 
 using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
-using RapidNetworkLibrary.Runtime.Zones;
-using RapidNetworkLibrary.Runtime.Memory;
+using RapidNetworkLibrary.Memory;
 
+
+
+
+public struct RNetIPAddress : IEquatable<RNetIPAddress>
+{
+    public string ip;
+    public ushort port;
+
+    public RNetIPAddress(string ip, ushort port)
+    {
+        this.ip = ip;
+        this.port = port;
+    }
+    public bool Equals(RNetIPAddress other)
+    {
+        if(other.ip.Equals(ip) && other.port == port)
+            return true;
+        return false;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(ip, port);
+    }
+
+    public override string ToString()
+    {
+        return base.ToString();
+    }
+}
 
 namespace RapidNetworkLibrary.Workers
 {
-    public delegate ConnectionType GetConnectionTypeDelegate(RNetIPAddress address);
+   
     internal class LogicWorkerThread : WorkerThread
     {
 
@@ -29,9 +63,8 @@ namespace RapidNetworkLibrary.Workers
         private Action onLogicInit;
 
 #if SERVER
-        internal Action<Connection> onClientConnected;
-        internal Action<Connection> onServerConnected;
-        internal GetConnectionTypeDelegate getConnectionType;
+        internal Action<Connection> onSocketConnect;
+        
 #elif CLIENT
         internal Action<Connection> onConnectedToServer;
 #endif
@@ -42,10 +75,10 @@ namespace RapidNetworkLibrary.Workers
         private WorkerCollection workers;
 
         private PacketFreeCallback packetFree;
-        private SmmallocInstance smmalloc;
-        public LogicWorkerThread(Action logicInitAction, WorkerCollection wrk, SmmallocInstance malloc)
+        
+        public LogicWorkerThread(Action logicInitAction, WorkerCollection wrk)
         {
-            smmalloc = malloc;
+
            
             workers = wrk;
 
@@ -86,7 +119,7 @@ namespace RapidNetworkLibrary.Workers
         protected override void Init()
         {
             shouldRun = true;
-            smmalloc.CreateThreadCache(4 * 1024, CacheWarmupOptions.Hot);
+
             packetFree += onPacketFree;
             while(workers == null)
             {
@@ -113,10 +146,9 @@ namespace RapidNetworkLibrary.Workers
             switch (messageID)
             {
                 case WorkerThreadMessageID.SendConnection:
-#if SERVER
                     var msgData = MemoryHelper.Read<SendConnectionDataThreadMessage>(data);
                     connectionHandler.HandleSocketConnection(msgData.id,msgData.ip, msgData.port);
-#endif
+
                     break;
 
                 case WorkerThreadMessageID.SendDisconnection:
@@ -127,39 +159,26 @@ namespace RapidNetworkLibrary.Workers
                     connectionHandler.HandleTimeout(MemoryHelper.Read<uint>(data));
                     break;
 
-                case WorkerThreadMessageID.SendSerializeNetworkMessage:
-                    SerializeOutgoingMessage(MemoryHelper.Read<SerializeNetworkMessageThreadMessage>(data));
+                case WorkerThreadMessageID.SendSerializeMessage:
+                    
+
+                    var msg = MemoryHelper.Read<SerializeNetworkMessageThreadMessage>(data);
+                    //SendMessage(msg.target, msg.id, msg.channel, msg.flags, msg.messageObjectPointer);
+                    SerializeOutgoingMessage(msg);
                     break;
 
                 case WorkerThreadMessageID.SendDeserializeNetworkMessage:
                     DeserializeIncomingMessage(MemoryHelper.Read<DeserializeNetworkMessageThreadMessage>(data));
                     break;
 
-                case WorkerThreadMessageID.SendPeerData:
-                    TransferPeerData(MemoryHelper.Read<PeerDataThreadMessage>(data));
-                    break;
+
 
             }
         }
 
 
 
-        private void TransferPeerData(PeerDataThreadMessage data)
-        {
-            if (connectionHandler.IsConnectionValid(data.id) == false)
-                return;
-            var con = Connection.Create(connectionHandler.GetConnection(data.id));
-            con.BytesReceived = data.bytesReceived;
-            con.BytesSent = data.bytesSent;         
-            con.LastReceiveTime = data.lastReceiveTime;
-            con.LastSendTime = data.lastSendTime;
-            con.LastRoundTripTime = data.lastRoundTripTime;
-            con.Mtu = data.mtu;
-            con.PacketsLost = data.packetsLost;
-            con.PacketsSent = data.packetsSent;
-            con.Port = data.port;
-            connectionHandler.SetConnection(data.id, con);
-        }
+       
 
         private unsafe void DeserializeIncomingMessage(DeserializeNetworkMessageThreadMessage data)
         {
@@ -174,15 +193,7 @@ namespace RapidNetworkLibrary.Workers
 
             if (msgID == NetworkMessages.informConnectionType)
             {
-                var messageData = serializers[msgID].Deserialize(buffer);
-                var msg = MemoryHelper.Read<InformConnectionType>(messageData);
-#if CLIENT
-                connectionHandler.HandleSocketConnection(data.sender, msg.type, data.ip, data.port);
-#elif SERVER
-                var con = connectionHandler.GetConnection(data.sender);
-                con.ConnectionType = msg.type;
-#endif
-                MemoryHelper.Free(messageData);
+
 
             }
             else
@@ -199,11 +210,14 @@ namespace RapidNetworkLibrary.Workers
             }
 
             data.packet.Dispose();
-            //data.ip.Free();
+            data.ip.Free();
             buffer.Clear();
 
         }
 
+        
+
+        
         private unsafe void SerializeOutgoingMessage(SerializeNetworkMessageThreadMessage data)
         {
             Logger.Log(LogLevel.Info, "Attempting to serialize outgoing message");
@@ -220,7 +234,7 @@ namespace RapidNetworkLibrary.Workers
             Packet packet = default(Packet);
             packet.Create(ptr, buffer.Length, data.flags);
             packet.SetFreeCallback(packetFree);
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendSerializeNetworkMessage, new PacketDataThreadMessage()
+            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendSerializeMessage, new PacketDataThreadMessage()
             {
                 target = data.target,
                 channel = data.channel,
@@ -241,7 +255,6 @@ namespace RapidNetworkLibrary.Workers
         {
             
             connectionHandler.Destroy();
-            smmalloc.DestroyThreadCache();
 
         }
     }

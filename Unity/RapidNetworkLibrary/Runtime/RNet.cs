@@ -1,30 +1,36 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using ENet;
 using RapidNetworkLibrary.Connections;
 using RapidNetworkLibrary.Logging;
-using RapidNetworkLibrary.Runtime.Memory;
+using RapidNetworkLibrary.Memory;
 using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Workers;
-#if ENABLE_MONO || ENABLE_IL2CPP
-using Unity.Collections.LowLevel.Unsafe;
-#endif
+
 
 namespace RapidNetworkLibrary
 {
+
     public static class RNet
     {
         private static WorkerCollection workers = new WorkerCollection();
 
         private static Action onInit;
-        internal static ConnectionType connectionType;
-        public unsafe static void Init(Action initAction, ConnectionType conType) 
+        
+        public unsafe static void Init(Action initAction, MemoryAllocator alloc = null) 
         {
             
-            connectionType = conType;
-            SmmallocInstance smmalloc = new SmmallocInstance(8, 4 * 1024 * 1024);
-            MemoryHelper.SetMalloc(smmalloc);
-            workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers, smmalloc);
+            
+            if (alloc == null)
+            {
+#if ENABLE_MONO || ENABLE_IL2CPP
+                MemoryHelper.SetMalloc(new UnityAllocator());
+#else
+                MemoryHelper.SetMalloc(new RNetAllocator());
+#endif
+            }
+            workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers);
             workers.socketWorker.StartThread(20);
             onInit += initAction;
 
@@ -35,7 +41,7 @@ namespace RapidNetworkLibrary
             workers.socketWorker.OnDestroy();
             workers.logicWorker.OnDestroy();
             workers.gameWorker.OnDestroy();
-            MemoryHelper.FreeMalloc();
+
         }
 
 
@@ -47,7 +53,7 @@ namespace RapidNetworkLibrary
         {       
             Logger.Log(LogLevel.Info, "Network Thread Initialized!");
             
-            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers, workers.socketWorker.smmalloc);
+            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers);
             workers.logicWorker.StartThread(20);
         }
 
@@ -105,7 +111,11 @@ namespace RapidNetworkLibrary
             workers.socketWorker.Enqueue(WorkerThreadMessageID.SendConnectToSocket, connectMessage);
 
         }
-        private static void SendMessage<T>(uint target, ushort messageID, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
+
+
+
+       
+        internal static void SendMessage<T>(uint target, ushort messageID, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
         {
             var msg = new SerializeNetworkMessageThreadMessage()
             {
@@ -113,12 +123,12 @@ namespace RapidNetworkLibrary
                 id = messageID,
                 messageObjectPointer = MemoryHelper.Write(message),
                 channel = channel,
+                flags = flags | PacketFlags.NoAllocate
             };
-            if(msg.flags.HasFlag(PacketFlags.NoAllocate))
-                msg.flags |= PacketFlags.NoAllocate;
-            workers.logicWorker.Enqueue(WorkerThreadMessageID.SendSerializeNetworkMessage, msg);
-        }
 
+            workers.logicWorker.Enqueue(WorkerThreadMessageID.SendSerializeMessage, msg);
+        }
+        
         public static void SendUnreliable<T>(Connection target, ushort messageID, byte channel, T message) where T : unmanaged, IMessageObject
         {
             SendMessage(target.ID, messageID, channel, PacketFlags.None, message);
@@ -182,27 +192,17 @@ namespace RapidNetworkLibrary
 
 
 #if SERVER
-        public static void RegisterOnClientConnectEvent(Action<Connection> clientConnectLogicAction = null, Action<Connection> clientConnectGameAction = null)
-        {
-            if (clientConnectLogicAction != null)
-                workers.logicWorker.onClientConnected += clientConnectLogicAction;
 
-            if(clientConnectGameAction != null)
-                workers.gameWorker.onClientConnected += clientConnectGameAction; 
-        }
 
-        public static void RegisterOnServerConnectEvent(Action<Connection> serverConnectLogicAction = null, Action<Connection> serverConnectGameAction = null)
+        public static void RegisterOnSocketConnect(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
         {
-            if(serverConnectLogicAction != null)
-                workers.logicWorker.onServerConnected += serverConnectLogicAction;
+            if(socketConnectLogicAction != null)
+                workers.logicWorker.onSocketConnect += socketConnectLogicAction;
 
-            if (serverConnectGameAction != null)
-                workers.gameWorker.onServerConnected += serverConnectGameAction;
+            if (socketConnectGameAction != null)
+                workers.gameWorker.onSocketConnected += socketConnectGameAction;
         }
-        public static void RegisterGetConnectionTypeEvent(GetConnectionTypeDelegate connection)
-        {
-            workers.logicWorker.getConnectionType += connection;
-        }
+        
 #elif CLIENT
         public static void RegisterOnConnectedToServerEvent(Action<Connection> logicConnectedToServerAction = null, Action<Connection> gameConnectedToServerAction = null)
         {

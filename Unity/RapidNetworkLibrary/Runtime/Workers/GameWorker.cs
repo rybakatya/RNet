@@ -1,9 +1,11 @@
 ﻿using RapidNetworkLibrary.Connections;
 using RapidNetworkLibrary.Logging;
+using RapidNetworkLibrary.Memory;
 using RapidNetworkLibrary.Threading;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 
 namespace RapidNetworkLibrary.Workers
@@ -11,8 +13,7 @@ namespace RapidNetworkLibrary.Workers
     internal class GameWorker : Worker
     {
 #if SERVER
-        public Action<Connection> onClientConnected;
-        public Action<Connection> onServerConnected;
+        public Action<Connection> onSocketConnected;
 
         public Action<uint> test;
 #elif CLIENT
@@ -27,25 +28,17 @@ namespace RapidNetworkLibrary.Workers
             switch (message)
             {
                 case WorkerThreadMessageID.SendConnection:
-                    var connection = MemoryHelper.Read<SendConnectionDataThreadMessage>(data);
-                    Logger.Log(LogLevel.Warning, connection.id.ToString());
+                    var connection = MemoryHelper.Read<Connection>(data);
+                   
 #if SERVER
-                    if (onServerConnected != null)
-                        onServerConnected(new Connection());
-                    /*
-                    if (connection.ConnectionType == ConnectionType.Client)
-                    {
-                        if (onClientConnected != null)
-                            onClientConnected(connection);
-                    }
-                    else if(connection.ConnectionType == ConnectionType.Server)
-                    {
-                        if(onServerConnected != null)
-                            onServerConnected(connection);
-                    }*/
+                    
+                    
+                        if(onSocketConnected != null)
+                            onSocketConnected(connection);
+                    
 #elif CLIENT
                     if(onConnectedToServer != null)
-                        onConnectedToServer(new Connection());
+                        onConnectedToServer(connection);
 #endif
                     
                     break;
@@ -68,6 +61,7 @@ namespace RapidNetworkLibrary.Workers
         public void Tick()
         {
             Consume();
+            
         }
         internal override void OnDestroy()
         {

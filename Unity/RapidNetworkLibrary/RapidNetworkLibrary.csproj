@@ -65,7 +65,9 @@
     <None Remove="Runtime\Replication.meta" />
     <None Remove="Runtime\Replication\Culling.meta" />
     <None Remove="Runtime\Replication\Culling\RNetObserver.cs.meta" />
+    <None Remove="Runtime\Replication\EntityPool.cs.meta" />
     <None Remove="Runtime\Replication\RNetEntityDatabase.cs.meta" />
+    <None Remove="Runtime\Replication\ServerEntityData.cs.meta" />
     <None Remove="Runtime\RNet.cs.meta" />
     <None Remove="Runtime\RNetSettings.cs.meta" />
     <None Remove="Runtime\rybakatya.rnet.asmdef.meta" />

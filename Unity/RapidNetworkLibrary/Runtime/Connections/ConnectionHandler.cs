@@ -1,11 +1,8 @@
-﻿using ENet;
-using RapidNetworkLibrary.Logging;
-using RapidNetworkLibrary.Runtime.Zones;
+﻿using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Serialization;
-using RapidNetworkLibrary.Threading.ThreadMessages;
 using System;
 using System.Collections.Generic;
-using System.IO;
+
 
 
 namespace RapidNetworkLibrary.Connections
@@ -41,59 +38,30 @@ namespace RapidNetworkLibrary.Connections
         }
 
 
-#if SERVER
+
         public unsafe void HandleSocketConnection(uint peerID, NativeString ip, ushort port)
-#elif CLIENT
-        public unsafe void HandleSocketConnection(uint peerID, ConnectionType connectionType, NativeString ip, ushort port)
-#endif
-        {
-            var conType = ConnectionType.Client;
 
+        {
+
+            var c = Connection.Create(peerID, ip, port);
 
 #if SERVER
             
-            if (workers.logicWorker.getConnectionType != null)
-            {
-                conType = workers.logicWorker.getConnectionType(new RNetIPAddress(ip.ToString(), port));
-            }
-            else
-            {
-                Logger.Log(LogLevel.Exception, "Must call RNet.RegisterGetConnectionTypeEvent before accepting any connections when building as a server.");
-                return;
-            }
-            var c = Connection.Create(peerID, conType, ip, port);
             
-            RNet.SendReliable(c, NetworkMessages.informConnectionType, new InformConnectionType()
-            {
-                type = RNet.connectionType
-            });
+           
 
             connections.Add(peerID, c);
-
-            if (conType == ConnectionType.Client)
-            {
-                if(workers.logicWorker.onClientConnected != null)
-                    workers.logicWorker.onClientConnected(c);
-            }
-
-            else if(conType == ConnectionType.Server)
-            {
-                workers.logicWorker.onServerConnected(c);
-            }
+            if (workers.logicWorker.onSocketConnect != null)
+                workers.logicWorker.onSocketConnect(c);
 #elif CLIENT
-            conType = connectionType;
-            var c = Connection.Create(peerID, connectionType, ip, port);
             connections.Add(peerID, c);
-
-            if(connectionType == ConnectionType.Server)
-            {
-                if(workers.logicWorker.onConnectedToServer != null)
-                    workers.logicWorker.onConnectedToServer(c);
-            }
+            if (workers.logicWorker.onConnectedToServer != null)
+                workers.logicWorker.onConnectedToServer(c);
+            
 #endif
            
 
-            workers.gameWorker.Enqueue(WorkerThreadMessageID.SendConnection, new SendConnectionDataThreadMessage() { id = c.ID});
+            workers.gameWorker.Enqueue(WorkerThreadMessageID.SendConnection, c);
         }
 
         public void HandleDisconnect(uint peer)
@@ -120,7 +88,7 @@ namespace RapidNetworkLibrary.Connections
         {
             foreach(var kvp in connections)
             {
-                kvp.Value.ipAddress.Free();
+                kvp.Value.IpAddress.Free();
             }
         }
     }

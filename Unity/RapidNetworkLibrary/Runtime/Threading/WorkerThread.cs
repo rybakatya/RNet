@@ -39,6 +39,7 @@ namespace RapidNetworkLibrary.Threading
             {
                 Consume();
                 Tick();
+                Thread.Sleep(20);
                 
             }
             

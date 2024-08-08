@@ -1,7 +1,7 @@
 ﻿using RapidNetworkLibrary;
 using RapidNetworkLibrary.Connections;
-using RapidNetworkLibrary.Runtime.Memory;
-using RapidNetworkLibrary.Runtime.Zones;
+
+
 
 internal class Program
 {
@@ -11,7 +11,7 @@ internal class Program
 #if SERVER
         Console.WriteLine("Hello, World!");
 
-        RNet.Init(onInit, ConnectionType.Server);
+        RNet.Init(onInit);
         while (true)
         {
             if (isInit == false)
@@ -22,24 +22,15 @@ internal class Program
 #endif
     }
 #if SERVER
-    private static ConnectionType DetermineConnectionType(RNetIPAddress address)
-    {
-        if(address.ip.Equals("127.0.0.1") && address.port == 7778)
-        {
-            return ConnectionType.Server;
-        }
-        return ConnectionType.Client;
-
-    }
+  
 
     private static void onInit()
     {       
        
         RNet.RegisterReceiveEvent(gameReceiveAction: OnNetworkMessage);
 
-        RNet.RegisterGetConnectionTypeEvent(DetermineConnectionType);
-        RNet.RegisterOnClientConnectEvent(LogicOnClientConnect, GameOnClientConnect);
-        RNet.RegisterOnServerConnectEvent(LogicOnServerConnect, GameOnServerConnect);
+
+        RNet.RegisterOnSocketConnect(LogicOnServerConnect, GameOnServerConnect);
 
         RNet.InitializeServer("127.0.0.1", 7777, 255, 2048);
 

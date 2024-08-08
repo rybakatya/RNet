@@ -5,7 +5,8 @@ using RapidNetworkLibrary.Threading;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Logging;
 using System.Collections.Generic;
-using RapidNetworkLibrary.Runtime.Memory;
+using RapidNetworkLibrary.Memory;
+
 
 
 namespace RapidNetworkLibrary.Workers
@@ -15,23 +16,23 @@ namespace RapidNetworkLibrary.Workers
         private WorkerCollection workers;
 
         private Host enetHost;
-        internal SmmallocInstance smmalloc;
+        
         int test;
 
         public Action onInit;
 
         public Dictionary<uint, Peer> peers = new Dictionary<uint, Peer>();
 
-        public SocketWorkerThread(Action initCallback, WorkerCollection wrk, SmmallocInstance malloc)
+        public SocketWorkerThread(Action initCallback, WorkerCollection wrk)
         {
             onInit += initCallback;
             workers = wrk;
-            smmalloc = malloc;
+           
         }
         protected override void Init()
         {
             shouldRun = true;
-            smmalloc.CreateThreadCache(4 * 1024, CacheWarmupOptions.Hot);
+            
             InitializeENet();
 
 
@@ -74,7 +75,7 @@ namespace RapidNetworkLibrary.Workers
         private void InitializeENetClient(byte channelLimit)
         {
             enetHost = new Host();
-            enetHost.Create(12, channelLimit);
+            enetHost.Create(2048, channelLimit);
            
         }
 #endif
@@ -141,34 +142,10 @@ namespace RapidNetworkLibrary.Workers
                   
                     break;
             }
-            if (e.Type != EventType.None)
-            {
-                if (e.Peer.State == PeerState.Connected)
-                {
-                    SendNetworkData(e.Peer);
-                }
-            }
+
         }
 
-        private void SendNetworkData(Peer peer)
-        {
-            var data = new PeerDataThreadMessage()
-            {
-                id = peer.ID,
-                bytesSent = peer.BytesSent,
-                bytesReceived = peer.BytesReceived,
-                
-                lastReceiveTime = peer.LastReceiveTime,
-                lastSendTime = peer.LastSendTime,
-                lastRoundTripTime = peer.LastRoundTripTime,
-                mtu = peer.MTU,
-                packetsSent = peer.PacketsSent,
-                packetsLost = peer.PacketsLost,
-                packetsThrottle = peer.PacketsThrottle,
-                port = peer.Port
-            };
-            workers.logicWorker.Enqueue(WorkerThreadMessageID.SendPeerData, data);
-        }
+        
 
         internal override void OnConsume(WorkerThreadMessageID messageID, IntPtr data)
         {
@@ -200,7 +177,7 @@ namespace RapidNetworkLibrary.Workers
                     InitializeENetClient(MemoryHelper.Read<byte>(data));
                     break;
 #endif
-                case WorkerThreadMessageID.SendSerializeNetworkMessage:
+                case WorkerThreadMessageID.SendSerializeMessage:
                     var packetData = MemoryHelper.Read<PacketDataThreadMessage>(data);
                     if(peers.ContainsKey(packetData.target) == true)
                     {
@@ -249,7 +226,7 @@ namespace RapidNetworkLibrary.Workers
         protected override void Destroy()
         {
             enetHost.Flush();
-            smmalloc.DestroyThreadCache();
+            
             ENet.Library.Deinitialize();
         }
         AllocCallback OnMemoryAllocate = (size) =>

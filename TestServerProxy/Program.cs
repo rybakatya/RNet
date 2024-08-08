@@ -1,7 +1,7 @@
 ﻿using RapidNetworkLibrary;
 using RapidNetworkLibrary.Connections;
-using RapidNetworkLibrary.Runtime.Memory;
-using RapidNetworkLibrary.Runtime.Zones;
+using RapidNetworkLibrary.Serialization;
+
 
 internal class Program
 {
@@ -12,7 +12,7 @@ internal class Program
 #if SERVER
         Console.WriteLine("Hello, World!");
        
-        RNet.Init(onInit, ConnectionType.Server);
+        RNet.Init(onInit);
         while (true)
         {
             if (isInit == false)
@@ -30,9 +30,8 @@ internal class Program
         isInit = true;
         
 
-        RNet.RegisterGetConnectionTypeEvent(DetermineConnectionType);
-        RNet.RegisterOnClientConnectEvent(clientConnectLogicAction: LogicOnClientConnect);
-        RNet.RegisterOnServerConnectEvent(serverConnectLogicAction: LogicOnServerConnect);
+      
+        RNet.RegisterOnSocketConnect(socketConnectLogicAction: LogicOnServerConnect);
 
         RNet.InitializeServer("127.0.0.1", 7778, 255, 2048);
 
@@ -47,18 +46,14 @@ internal class Program
         Console.WriteLine("Formed a connection with server");
     }
 
-   
+    
     private static void LogicOnClientConnect(Connection connection)
     {
-        Console.WriteLine("Formed a connection with a client");
+
+        Console.WriteLine("Formed a connection with a client " + connection.IpAddress + ":" + connection.Port);
     }
 
-    private static ConnectionType DetermineConnectionType(RNetIPAddress address)
-    {
-        if (address.ip.Equals("127.0.0.1") && address.port == 7777)
-            return ConnectionType.Server;
-        return ConnectionType.Client;
-    }
+   
 #endif
 }
 

@@ -1,20 +1,18 @@
 
 #if ENABLE_MONO || ENABLE_IL2CPP
+using Codice.Utils.Buffers;
+using Newtonsoft.Json;
+using RapidNetworkLibrary.Connections;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 
 namespace RapidNetworkLibrary.Replication
 {
-    public enum PeerType
-    {
-        Controller,
-        Owner,
-        Peer,
-        Proxy
-    }
+
 
 
     public class IDGenerator
@@ -29,10 +27,19 @@ namespace RapidNetworkLibrary.Replication
             }
         }
 
+        public void Reset()
+        {
+            int size = ids.Count;
+            ids.Clear();
+            for (int i = 0; i < size; i++)
+            {
+                ids.Add(i);
+            }
+        }
         public int Rent()
         {
             var i = ids[0];
-            ids.RemoveAt(0);
+            ids.RemoveAt(ids.Count - 1);
             return i;
         }
 
@@ -51,12 +58,12 @@ namespace RapidNetworkLibrary.Replication
 
 
     [System.Serializable]
-    public class EntityRootData
+    public class EditorEntityRootData
     {
 
         public ushort key;
         public string name;
-        public List<EntityData> entityData;
+        public List<EditorEntityData> entityData;
 
         [HideInInspector]
         public bool folded;
@@ -67,7 +74,7 @@ namespace RapidNetworkLibrary.Replication
     }
 
     [System.Serializable]
-    public class EntityData
+    public class EditorEntityData
     {
         public PeerType peerType;
         public GameObject go;
@@ -79,11 +86,11 @@ namespace RapidNetworkLibrary.Replication
     [CreateAssetMenu]
     public class RNetEntityDatabase : ScriptableObject
     {
-        public List<EntityRootData> entities;
+        public List<EditorEntityRootData> entities;
     }
 
     [CustomEditor(typeof(RNetEntityDatabase))]
-    public class LookAtPointEditor : UnityEditor.Editor
+    public class EntityDatabaseEditor : UnityEditor.Editor
     {
         RNetEntityDatabase instance;
 
@@ -96,7 +103,7 @@ namespace RapidNetworkLibrary.Replication
 
             content = new GUIContent();
             content.text = "Element";
-           
+
         }
 
         private bool isFolded = false;
@@ -107,8 +114,8 @@ namespace RapidNetworkLibrary.Replication
         {
             serializedObject.Update();
             style = new GUIStyle("Foldout");
-            if(currentStyle == null)
-            { 
+            if (currentStyle == null)
+            {
                 currentStyle = new GUIStyle(GUI.skin.box);
                 currentStyle.normal.background = MakeTex(2, 2, Color.black);
             }
@@ -118,25 +125,24 @@ namespace RapidNetworkLibrary.Replication
             if (isFolded)
             {
 
-                for(int i = 0; i < instance.entities.Count; i++) 
+                for (int i = 0; i < instance.entities.Count; i++)
                 {
 
                     DrawEntityRootData(instance.entities[i], i);
-                    
+
 
                 }
                 GUILayout.Space(5);
 
-                if(GUILayout.Button("Create Entity"))
+                if (GUILayout.Button("Create Entity"))
                 {
-                    
-                    var root = new EntityRootData();
-                    root.entityData = new List<EntityData>();
+                    var root = new EditorEntityRootData();
+                    root.entityData = new List<EditorEntityData>();
                     instance.entities.Add(root);
                 }
 
                 GUILayout.FlexibleSpace();
-                if(GUILayout.Button("Bake"))
+                if (GUILayout.Button("Bake"))
                 {
                     BakeEntities();
                 }
@@ -151,8 +157,132 @@ namespace RapidNetworkLibrary.Replication
 
         private void BakeEntities()
         {
-            throw new NotImplementedException();
+            clientDatas.Clear();
+            serverDatas.Clear();
+            ushort i = 0;
+            foreach (var entity in instance.entities)
+            {
+                entity.key = i;
+                BakeEntity(entity);
+                i++;
+            }
+            RebuildAssetBundles();
+            BuildJson();
         }
+
+
+        List<ServerEntityData> serverDatas = new List<ServerEntityData>();
+        List<ClientEntityRootData> clientDatas = new List<ClientEntityRootData>();
+        public void BuildJson()
+        {
+            var path = Path.Combine(Application.streamingAssetsPath, "server");
+            if (Directory.Exists(path) == false)
+                Directory.CreateDirectory(path);
+            path = Path.Combine(path, "ServerEntities.json");
+            File.WriteAllText(path, JsonConvert.SerializeObject(serverDatas, Formatting.Indented));
+
+            path = Path.Combine(Application.streamingAssetsPath, "client");
+            if (Directory.Exists(path) == false)
+                Directory.CreateDirectory(path);
+            path = Path.Combine(path, "ClientEntities.json");
+            File.WriteAllText(path, JsonConvert.SerializeObject(clientDatas, Formatting.Indented));
+        }
+        private List<AssetBundleBuild> bundlesToRebuild = new List<AssetBundleBuild>();
+        private void RebuildAssetBundles()
+        {
+            var oPath = Path.Combine(Application.streamingAssetsPath);
+            if (Directory.Exists(oPath) == false)
+                Directory.CreateDirectory(oPath);
+
+            Debug.Log(oPath);
+            BuildPipeline.BuildAssetBundles(oPath, bundlesToRebuild.ToArray(), BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
+            bundlesToRebuild.Clear();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private void BakeEntity(EditorEntityRootData entity)
+        {
+            BakeServer(entity);
+            BakeClient(entity);
+        }
+
+
+        private void BakeClient(EditorEntityRootData entity)
+        {
+            var clientData = new ClientEntityRootData();
+            clientData.key= entity.key;
+           
+            clientData.data = new List<ClientEntityData>();
+            foreach(var data in entity.entityData)
+            {
+                if(data.peerType != PeerType.Server)
+                {
+                    var bundleName = "client/" + entity.name + "_" + data.peerType.ToString().ToLower();
+                    clientData.data.Add(new ClientEntityData()
+                    {
+                        bundleName = bundleName,
+                        peerType = data.peerType,
+                        poolSize = data.poolSize
+                    });
+
+                    data.go.name = bundleName;
+                    var assetPath = AssetDatabase.GetAssetPath(data.go);
+                    var importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
+
+                    importer.assetBundleName = bundleName;
+
+
+                    AssetBundleBuild buildMap = new AssetBundleBuild();
+                    buildMap.assetBundleName = importer.assetBundleName;
+
+                    // Find all asset paths assigned to this AssetBundle
+                    string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(importer.assetBundleName);
+                    buildMap.assetNames = assetPaths;
+
+                    
+
+                    bundlesToRebuild.Add(buildMap);
+                }
+            }
+            clientDatas.Add(clientData);
+
+        }
+        private void BakeServer(EditorEntityRootData entity)
+        {
+            var serverData = new ServerEntityData();
+
+            serverData.key = entity.key;
+            foreach(var data in entity.entityData)
+            {
+                if(data.peerType == PeerType.Server)
+                {
+                    serverData.poolSize = data.poolSize;
+                   
+                    var assetPath = AssetDatabase.GetAssetPath(data.go);
+
+                    var importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
+                    serverData.bundleName = "server/"+entity.name;
+                    importer.assetBundleName = serverData.bundleName;
+
+                    data.go.name = serverData.bundleName;
+                    AssetBundleBuild buildMap = new AssetBundleBuild();
+                    buildMap.assetBundleName = importer.assetBundleName;
+
+                    // Find all asset paths assigned to this AssetBundle
+                    string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(importer.assetBundleName);
+                    buildMap.assetNames = assetPaths;
+
+
+
+                    bundlesToRebuild.Add(buildMap);
+                    serverDatas.Add(serverData);
+                    break;
+                }
+            } 
+        }
+        
+
 
         private Texture2D MakeTex(int width, int height, Color col)
         {
@@ -166,7 +296,7 @@ namespace RapidNetworkLibrary.Replication
             result.Apply();
             return result;
         }
-        public void DrawEntityRootData(EntityRootData entity, int i)
+        public void DrawEntityRootData(EditorEntityRootData entity, int i)
         {
 
             //foldedEntities[i] = EditorGUILayout.Foldout(foldedEntities[i], content, style);
@@ -174,9 +304,22 @@ namespace RapidNetworkLibrary.Replication
             GUILayout.Space(15);
             instance.entities[i].folded = EditorGUILayout.Foldout(instance.entities[i].folded, "Test");
             GUILayout.FlexibleSpace();
-            if(GUILayout.Button("Delete"))
+            if (GUILayout.Button("Delete"))
             {
+                foreach(var data in instance.entities[i].entityData)
+                {
+                    if(data.go != null)
+                    {
+                        var assetPath = AssetDatabase.GetAssetPath(data.go);
+                        if(assetPath != null)
+                        {
+                            var importer = AssetImporter.GetAtPath(assetPath);
+                            importer.assetBundleName = "";
+                        }
+                    }
+                }
                 instance.entities.Remove(instance.entities[i]);
+                BakeEntities();
                 return;
             }
             GUILayout.EndHorizontal();
@@ -197,7 +340,7 @@ namespace RapidNetworkLibrary.Replication
             DrawBottomBorder(15);
         }
 
-        private void DrawEntityDatas(EntityRootData entity, int i)
+        private void DrawEntityDatas(EditorEntityRootData entity, int i)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Space(45f);
@@ -215,9 +358,9 @@ namespace RapidNetworkLibrary.Replication
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Create") == true)
                 {
-                    var data = new EntityData();
+                    var data = new EditorEntityData();
 
-                    instance.entities[i].entityData.Add(new EntityData());
+                    instance.entities[i].entityData.Add(new EditorEntityData());
                 }
                 GUILayout.EndHorizontal();
             }
@@ -232,7 +375,17 @@ namespace RapidNetworkLibrary.Replication
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Delete"))
             {
+                if(instance.entities[i].entityData[x].go != null)
+                {
+                    var assetPath = AssetDatabase.GetAssetPath(instance.entities[i].entityData[x].go);
+                    if (assetPath != null)
+                    {
+                        var importer = AssetImporter.GetAtPath(assetPath);
+                        importer.assetBundleName = "";
+                    }
+                }
                 instance.entities[i].entityData.Remove(instance.entities[i].entityData[x]);
+                BakeEntities();
                 return;
             }
             GUILayout.EndHorizontal();
@@ -242,7 +395,7 @@ namespace RapidNetworkLibrary.Replication
                 GUILayout.Space(60);
 
                 //instance.entities[i].entityData[x].peerType = (PeerType)EditorGUILayout.EnumPopup("PeerType",
-                 //   instance.entities[i].entityData[x].peerType);
+                //   instance.entities[i].entityData[x].peerType);
 
                 GUILayout.Label("Peer Type");
                 GUILayout.FlexibleSpace();
@@ -275,5 +428,6 @@ namespace RapidNetworkLibrary.Replication
             GUILayout.EndHorizontal();
         }
     }
+
 }
 #endif

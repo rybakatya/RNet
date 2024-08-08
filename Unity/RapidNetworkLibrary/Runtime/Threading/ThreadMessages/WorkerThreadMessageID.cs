@@ -7,9 +7,10 @@
     SendInitializeServer,
     SendConnectToSocket,
     SendInitClient,
-    SendSerializeNetworkMessage,
+    DontUse,
     SendDeserializeNetworkMessage,
     SendNetworkMessageToGameThread,
     SendPeerData,
-    SendDisconnectionFromPeers
+    SendDisconnectionFromPeers,
+    SendSerializeMessage
 }

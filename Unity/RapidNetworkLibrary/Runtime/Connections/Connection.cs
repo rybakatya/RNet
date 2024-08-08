@@ -7,12 +7,12 @@ namespace RapidNetworkLibrary.Connections
     public struct Connection : IEquatable<Connection>
     {
         private readonly uint peer;
-        private ConnectionType connectionType;
+        
 
 
         private ulong bytesSent;
         private ulong bytesReceived;
-        internal NativeString ipAddress;
+        private NativeString ipAddress;
         private uint lastReceiveTime;
         private uint lastSendTime;
         private uint lastRoundTripTime;
@@ -22,9 +22,9 @@ namespace RapidNetworkLibrary.Connections
 
         private ushort port;
 
-        public static Connection Create(uint id, ConnectionType type, NativeString ip, ushort port)
+        public static Connection Create(uint id, NativeString ip, ushort port)
         {
-            return new Connection(id, type, ip, port);
+            return new Connection(id, ip, port);
         }
 
         public static Connection Create(Connection connection)
@@ -36,10 +36,10 @@ namespace RapidNetworkLibrary.Connections
         {
             connection.ipAddress.Free();
         }
-        private Connection(uint p, ConnectionType type, NativeString ip, ushort prt)
+        private Connection(uint p, NativeString ip, ushort prt)
         {
             peer = p;
-            connectionType = type;
+            
             bytesSent = 0;
             bytesReceived = 0;
             ipAddress = ip;
@@ -59,7 +59,7 @@ namespace RapidNetworkLibrary.Connections
         private Connection(Connection con)
         {
             peer = con.peer;
-            connectionType = con.connectionType;
+            
 
 
             bytesSent = con.bytesSent;
@@ -78,17 +78,7 @@ namespace RapidNetworkLibrary.Connections
             get { return peer; }
         }
 
-        public ConnectionType ConnectionType
-        {
-            get
-            {
-                return connectionType;
-            }
-            internal set
-            {
-                connectionType = value;
-            }
-        }
+        
 
         public ulong BytesSent { get => bytesSent; internal set => bytesSent = value; }
         public ulong BytesReceived { get => bytesReceived; internal set => bytesReceived = value; }
@@ -100,6 +90,7 @@ namespace RapidNetworkLibrary.Connections
         public ulong PacketsLost { get => packetsLost; internal set => packetsLost = value; }
 
         public ushort Port { get => port; internal set => port =  value; }
+        public NativeString IpAddress { get => ipAddress; set => ipAddress = value; }
 
         public bool Equals(Connection other)
         {

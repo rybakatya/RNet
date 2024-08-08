@@ -5,7 +5,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        RNet.Init(onInit, ConnectionType.Client);
+        RNet.Init(onInit);
 
         while (true)
         {
@@ -22,7 +22,10 @@ internal class Program
         RNet.InitializeClient(255);
         RNet.RegisterOnConnectedToServerEvent(LogicOnConnectedToServer, GameOnConnectedToServer);
 #endif
-        RNet.Connect("127.0.0.1", 7778);
+        for (int i = 0; i < 1000; i++)
+        {
+            RNet.Connect("127.0.0.1", 7778);
+        }
         isInit = true;
     }
 

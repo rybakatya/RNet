@@ -21,6 +21,8 @@
  *  SOFTWARE.
  */
 
+/*
+
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -202,4 +204,4 @@ namespace RapidNetworkLibrary.Runtime.Memory
 		[DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
 		internal static extern int sm_mbucket(IntPtr allocator, IntPtr memory);
 	}
-}
+}*/

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RapidNetworkLibrary.Memory;
+using System;
 using System.Runtime.InteropServices;
 
 #if ENABLE_MONO || ENABLE_IL2CPP
@@ -38,6 +39,7 @@ namespace RapidNetworkLibrary
         }
         public void Free()
         {
+
             MemoryHelper.Free(value);
            // Marshal.FreeHGlobal(value);
         }

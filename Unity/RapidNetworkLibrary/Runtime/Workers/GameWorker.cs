@@ -1,16 +1,14 @@
 ﻿using RapidNetworkLibrary.Connections;
+using RapidNetworkLibrary.Extensions;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
 using RapidNetworkLibrary.Threading;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using System;
-using System.Diagnostics;
-using System.Threading;
-
 
 namespace RapidNetworkLibrary.Workers
 {
-    internal class GameWorker : Worker
+    public class GameWorker : Worker
     {
 #if SERVER
         public Action<Connection> onSocketConnected;
@@ -20,16 +18,25 @@ namespace RapidNetworkLibrary.Workers
         public Action<Connection> onConnectedToServer;
 #endif
         public Action<Connection, ushort, IntPtr> onSocketReceive;
-        
 
-        internal override void OnConsume(WorkerThreadMessageID message, IntPtr data)
+        private readonly WorkerCollection _workers;
+        private readonly ExtensionManager _extensionManager;
+        
+        internal GameWorker(WorkerCollection workers, ExtensionManager extensionManager)
+        {
+            _workers = workers;
+            _extensionManager = extensionManager;
+        }
+
+        internal override void OnConsume(ushort message, IntPtr data)
         {
             
             switch (message)
             {
-                case WorkerThreadMessageID.SendConnection:
+                case (ushort)WorkerThreadMessageID.SendConnection:
                     var connection = MemoryHelper.Read<Connection>(data);
-                   
+                    _extensionManager.OnSocketConnect(ThreadType.Game,connection);
+
 #if SERVER
                     
                     
@@ -37,33 +44,38 @@ namespace RapidNetworkLibrary.Workers
                             onSocketConnected(connection);
                     
 #elif CLIENT
-                    if(onConnectedToServer != null)
+                    if (onConnectedToServer != null)
                         onConnectedToServer(connection);
 #endif
                     
                     break;
 
 
-                case WorkerThreadMessageID.SendNetworkMessageToGameThread:
+                case (ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread:
                     var msgData = MemoryHelper.Read<NetworkMessageDataThreadMessage>(data);
-                    Logger.Log(LogLevel.Info, "Received message id " + msgData.messageID.ToString());
+                    Logging.Logger.Log(LogLevel.Info, "Received message id " + msgData.messageID.ToString());
+                    
+
                     if (onSocketReceive != null)
                         onSocketReceive(msgData.sender, msgData.messageID, msgData.messageData);
 
                     MemoryHelper.Free(msgData.messageData);
                     break;
 
-                
-                        
+                default:
+                    _extensionManager.OnThreadMessageReceived(ThreadType.Game, message, data);
+                    break;
+
+
+
             }
         }
 
         public void Tick()
         {
-            Consume();
-            
+            Consume();           
         }
-        internal override void OnDestroy()
+        public override void OnDestroy()
         {
 
         }

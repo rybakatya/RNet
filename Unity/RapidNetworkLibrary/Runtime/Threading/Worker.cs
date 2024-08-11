@@ -1,6 +1,7 @@
 ﻿using LocklessQueue.Queues;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
+using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using System;
 
 
@@ -10,13 +11,13 @@ namespace RapidNetworkLibrary.Threading
     {
         internal bool shouldRun;
         internal MPSCQueue<IntPtr> messageQueue = new MPSCQueue<IntPtr>(1024);
-        internal abstract void OnConsume(WorkerThreadMessageID message, IntPtr data);
+        internal abstract void OnConsume(ushort message, IntPtr data);
 
-        internal abstract void OnDestroy();
+        public abstract void OnDestroy();
 
         
 
-        internal void Enqueue(WorkerThreadMessageID threadMessageID)
+        public void Enqueue(ushort threadMessageID)
         {
             var header = new WorkerThreadHeader()
             {
@@ -28,7 +29,7 @@ namespace RapidNetworkLibrary.Threading
             if (messageQueue.TryEnqueue(messagePointer) == false)
                 Logger.Log(LogLevel.Error, "Failed to enqueue " + threadMessageID.ToString() + " to the mpsc queue");
         }
-        internal void Enqueue<T>(WorkerThreadMessageID threadMessageID, T data) where T : unmanaged
+        public void Enqueue<T>(ushort threadMessageID, T data) where T : unmanaged
         {
             var dataPointer = MemoryHelper.Write<T>(data);
             var header = new WorkerThreadHeader()
@@ -42,7 +43,7 @@ namespace RapidNetworkLibrary.Threading
                 Logger.Log(LogLevel.Error, "Failed to enqueue " + threadMessageID.ToString() + " to the mpsc queue");
         }
         
-        internal unsafe void Consume()
+        public unsafe void Consume()
         {
             var ptr = IntPtr.Zero;
             while (messageQueue.TryDequeue(out ptr) == true && shouldRun == true)
@@ -54,7 +55,7 @@ namespace RapidNetworkLibrary.Threading
             }
         }
 
-        internal void Flush()
+        public void Flush()
         {
             
             
@@ -62,6 +63,11 @@ namespace RapidNetworkLibrary.Threading
             while (messageQueue.TryDequeue(out ptr) == true)
             {
                 var header = MemoryHelper.Read<WorkerThreadHeader>(ptr);
+                if(header.messageID == (ushort)WorkerThreadMessageID.SendSerializeMessage)
+                {
+                    var data = MemoryHelper.Read<SerializeNetworkMessageThreadMessage>(header.data);
+                    MemoryHelper.Free(data.messageObjectPointer);
+                }
                 MemoryHelper.Free(header.data);
                 MemoryHelper.Free(ptr);
             }

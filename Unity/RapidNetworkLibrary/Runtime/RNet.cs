@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using ENet;
 using RapidNetworkLibrary.Connections;
+using RapidNetworkLibrary.Extensions;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
+
+
 using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Workers;
@@ -17,8 +19,9 @@ namespace RapidNetworkLibrary
         private static WorkerCollection workers = new WorkerCollection();
 
         private static Action onInit;
-        
-        public unsafe static void Init(Action initAction, MemoryAllocator alloc = null) 
+        private static bool isInit;
+        private static ExtensionManager extensionManager;
+        public unsafe static void Init(Action initAction, MemoryAllocator alloc = null)
         {
             
             
@@ -30,7 +33,9 @@ namespace RapidNetworkLibrary
                 MemoryHelper.SetMalloc(new RNetAllocator());
 #endif
             }
-            workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers);
+
+            extensionManager = new ExtensionManager(workers);
+            workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers, extensionManager);
             workers.socketWorker.StartThread(20);
             onInit += initAction;
 
@@ -38,38 +43,64 @@ namespace RapidNetworkLibrary
 
         public static void TearDown()
         {
-            workers.socketWorker.OnDestroy();
-            workers.logicWorker.OnDestroy();
+
             workers.gameWorker.OnDestroy();
+
+            workers.logicWorker.OnDestroy();
+
+            workers.socketWorker.OnDestroy();
+
+            isInit = false;
 
         }
 
+        public static void RegisterExtension<T>() where T : RNetExtension
+        {
+            extensionManager.LoadExtension<T>();
+        }
 
         public static void Tick()
         {
+            if (!isInit)
+                return;
             workers.gameWorker.Tick();
         }
         private static void OnSocketInit()
         {       
             Logger.Log(LogLevel.Info, "Network Thread Initialized!");
             
-            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers);
+            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers, extensionManager);
             workers.logicWorker.StartThread(20);
         }
 
         private static void OnLogicInit()
         {
             Logger.Log(LogLevel.Info, "Logic Thread Initialized!");
-            workers.gameWorker = new GameWorker();
+
+            workers.gameWorker = new GameWorker(workers, extensionManager);
             workers.gameWorker.shouldRun = true;
             Logger.Log(LogLevel.Info, "Main Thread Initialized!");
+            
+            
             Logger.Log(LogLevel.Info, "RNetInitialized!");
             if (onInit != null)
                 onInit();
 
+            
+            isInit = true;
+
+
+        }
+
+        private static void OnEntityThreadInit()
+        {
+            Logger.Log(LogLevel.Info, "Entity Thread Is Initialized!");
+            
         }
 
 #if SERVER
+
+
         public static void InitializeServer(string ip, ushort port, byte maxChannels, ushort maxConnections)
         {
 
@@ -79,26 +110,26 @@ namespace RapidNetworkLibrary
             serverInit.maxChannels = maxChannels;
             serverInit.maxConnections = maxConnections;
 
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendInitializeServer, serverInit);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendInitializeServer, serverInit);
         }
 
         internal static void Disconnect(uint connection)
         {
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendDisconnection, connection);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connection);
         }
         public static void Disconnect(Connection connection)
         {
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendDisconnection, connection.ID);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connection.ID);
         }
 #elif CLIENT
         public static void InitializeClient(byte maxChannels)
         {
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendInitClient, maxChannels);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendInitClient, maxChannels);
         }
 #endif
         public static void Disconnect()
         {
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendDisconnectionFromPeers);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnectionFromPeers);
         }
         public static void Connect(string ip, ushort port)
         {
@@ -108,25 +139,26 @@ namespace RapidNetworkLibrary
                 ip = address,
                 port = port
             };
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendConnectToSocket, connectMessage);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnectToSocket, connectMessage);
 
         }
 
 
-
-       
         internal static void SendMessage<T>(uint target, ushort messageID, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
         {
+            var ptr = MemoryHelper.Write(message);
+
+            
             var msg = new SerializeNetworkMessageThreadMessage()
             {
                 target = target,
                 id = messageID,
-                messageObjectPointer = MemoryHelper.Write(message),
+                messageObjectPointer = ptr,
                 channel = channel,
                 flags = flags | PacketFlags.NoAllocate
             };
 
-            workers.logicWorker.Enqueue(WorkerThreadMessageID.SendSerializeMessage, msg);
+            workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendSerializeMessage, msg);
         }
         
         public static void SendUnreliable<T>(Connection target, ushort messageID, byte channel, T message) where T : unmanaged, IMessageObject
@@ -212,6 +244,7 @@ namespace RapidNetworkLibrary
             if (gameConnectedToServerAction != null)
                 workers.gameWorker.onConnectedToServer += gameConnectedToServerAction;
         }
+
 #endif
     }
 

@@ -1,4 +1,3 @@
-
 #if ENABLE_MONO || ENABLE_IL2CPP
 using Codice.Utils.Buffers;
 using Newtonsoft.Json;
@@ -8,81 +7,13 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using RapidNetworkLibrary;
+using RapidNetworkLibrary.Replication;
+using System.CodeDom.Compiler;
+using System.Text;
 
-
-namespace RapidNetworkLibrary.Replication
+namespace RapidNetworkLibrary.Editor.Replication
 {
-
-
-
-    public class IDGenerator
-    {
-        public List<int> ids;
-        public IDGenerator(int size)
-        {
-            ids = new List<int>(size);
-            for (int i = 0; i < size; i++)
-            {
-                ids.Add(i);
-            }
-        }
-
-        public void Reset()
-        {
-            int size = ids.Count;
-            ids.Clear();
-            for (int i = 0; i < size; i++)
-            {
-                ids.Add(i);
-            }
-        }
-        public int Rent()
-        {
-            var i = ids[0];
-            ids.RemoveAt(ids.Count - 1);
-            return i;
-        }
-
-        public void Take(int id)
-        {
-            ids.Remove(id);
-        }
-
-        public void Return(int id)
-        {
-            ids.Add(id);
-        }
-    }
-
-
-
-
-    [System.Serializable]
-    public class EditorEntityRootData
-    {
-
-        public ushort key;
-        public string name;
-        public List<EditorEntityData> entityData;
-
-        [HideInInspector]
-        public bool folded;
-
-        [HideInInspector]
-        public bool listFolded;
-
-    }
-
-    [System.Serializable]
-    public class EditorEntityData
-    {
-        public PeerType peerType;
-        public GameObject go;
-        public ushort poolSize;
-
-        [HideInInspector]
-        public bool isShown;
-    }
     [CreateAssetMenu]
     public class RNetEntityDatabase : ScriptableObject
     {
@@ -124,6 +55,8 @@ namespace RapidNetworkLibrary.Replication
             isFolded = EditorGUILayout.Foldout(isFolded, "Entities");
             if (isFolded)
             {
+                if (instance.entities == null)
+                    instance.entities = new List<EditorEntityRootData>();
 
                 for (int i = 0; i < instance.entities.Count; i++)
                 {
@@ -168,8 +101,36 @@ namespace RapidNetworkLibrary.Replication
             }
             RebuildAssetBundles();
             BuildJson();
+            GenerateEntityCode();
         }
 
+        private void GenerateEntityCode()
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("public class EntityKeys");
+            builder.AppendLine("{");
+            foreach (var entity in instance.entities)
+            {
+                
+                builder.AppendLine("    public const ushort " + entity.name + " = " + entity.key + ";");
+
+
+            }
+            builder.AppendLine("}");
+            var p = "Assets/_code/generated/entities/EntityKeys_generated.cs";
+            if (File.Exists(p))
+            {
+                File.Delete(p);
+            }
+            if (Directory.Exists(Path.GetDirectoryName(p)) == false)
+                Directory.CreateDirectory(Path.GetDirectoryName(p));
+
+            File.WriteAllText(p, builder.ToString());
+
+            
+        }
+
+       
 
         List<ServerEntityData> serverDatas = new List<ServerEntityData>();
         List<ClientEntityRootData> clientDatas = new List<ClientEntityRootData>();

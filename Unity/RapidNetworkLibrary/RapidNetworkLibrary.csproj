@@ -37,6 +37,7 @@
     <None Remove="Editor\Replication\RNetEntityDatabase.cs.meta" />
     <None Remove="Editor\RNetSettingsWindow.cs.meta" />
     <None Remove="Editor\rybakatya.rnet.editor.asmdef.meta" />
+    <None Remove="Editor\SyncSolution.cs.meta" />
     <None Remove="obj.meta" />
     <None Remove="package.json.meta" />
     <None Remove="Plugins.meta" />
@@ -55,6 +56,8 @@
     <None Remove="Runtime\Connections\ConnectionType.cs.meta" />
     <None Remove="Runtime\Connections\InformConnectionSerializer.cs.meta" />
     <None Remove="Runtime\Connections\InformConnectionType.cs.meta" />
+    <None Remove="Runtime\Extension.meta" />
+    <None Remove="Runtime\IdGenerator.cs.meta" />
     <None Remove="Runtime\Logging.meta" />
     <None Remove="Runtime\Logging\Logger.cs.meta" />
     <None Remove="Runtime\Logging\LogLevel.cs.meta" />
@@ -65,7 +68,12 @@
     <None Remove="Runtime\Replication.meta" />
     <None Remove="Runtime\Replication\Culling.meta" />
     <None Remove="Runtime\Replication\Culling\RNetObserver.cs.meta" />
+    <None Remove="Runtime\Replication\Culling\SpatialHashBase.cs.meta" />
+    <None Remove="Runtime\Replication\Culling\WorldObserverUpdater.cs.meta" />
     <None Remove="Runtime\Replication\EntityPool.cs.meta" />
+    <None Remove="Runtime\Replication\NetworkEntity.meta" />
+    <None Remove="Runtime\Replication\NetworkEntity\EntityPool.cs.meta" />
+    <None Remove="Runtime\Replication\NetworkEntity\EntityWorkerThreadBase.cs.meta" />
     <None Remove="Runtime\Replication\RNetEntityDatabase.cs.meta" />
     <None Remove="Runtime\Replication\ServerEntityData.cs.meta" />
     <None Remove="Runtime\RNet.cs.meta" />

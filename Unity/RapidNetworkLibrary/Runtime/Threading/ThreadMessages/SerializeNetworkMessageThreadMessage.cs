@@ -6,7 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace RapidNetworkLibrary.Runtime.Threading.ThreadMessages
 {
-    public struct SerializeNetworkMessageThreadMessage
+    internal struct SerializeNetworkMessageThreadMessage
     {
         public uint target;
         public ushort id;

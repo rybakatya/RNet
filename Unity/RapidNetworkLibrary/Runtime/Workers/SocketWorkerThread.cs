@@ -6,27 +6,29 @@ using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Logging;
 using System.Collections.Generic;
 using RapidNetworkLibrary.Memory;
+using RapidNetworkLibrary.Extensions;
 
 
 
 namespace RapidNetworkLibrary.Workers
 {
-    internal class SocketWorkerThread : WorkerThread
+    public class SocketWorkerThread : WorkerThread
     {
         private WorkerCollection workers;
 
         private Host enetHost;
-        
+        private readonly ExtensionManager _extensionManager;
         int test;
 
-        public Action onInit;
+        internal Action onInit;
 
-        public Dictionary<uint, Peer> peers = new Dictionary<uint, Peer>();
+        internal Dictionary<uint, Peer> peers = new Dictionary<uint, Peer>();
 
-        public SocketWorkerThread(Action initCallback, WorkerCollection wrk)
+        internal SocketWorkerThread(Action initCallback, WorkerCollection wrk, ExtensionManager extensionManager)
         {
             onInit += initCallback;
             workers = wrk;
+            _extensionManager = extensionManager;
            
         }
         protected override void Init()
@@ -112,7 +114,7 @@ namespace RapidNetworkLibrary.Workers
 
                 case EventType.Connect:
                     peers.Add(e.Peer.ID, e.Peer);
-                    workers.logicWorker.Enqueue(WorkerThreadMessageID.SendConnection, new SendConnectionDataThreadMessage()
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnection, new SendConnectionDataThreadMessage()
                     {
                         id = e.Peer.ID,
                         ip = new NativeString(e.Peer.IP),
@@ -122,17 +124,17 @@ namespace RapidNetworkLibrary.Workers
 
                 case EventType.Disconnect:
                     peers.Remove(e.Peer.ID);
-                    workers.logicWorker.Enqueue(WorkerThreadMessageID.SendDisconnection, e.Peer.ID);
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, e.Peer.ID);
                     break;
 
                 case EventType.Timeout:
                     peers.Remove(e.Peer.ID);
-                    workers.logicWorker.Enqueue(WorkerThreadMessageID.SendTimeout, e.Peer.ID);
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendTimeout, e.Peer.ID);
                     break;
 
                 case EventType.Receive:
                     Logger.Log(LogLevel.Info, "Packet received on network thread, sending to logic thread for deserialization.");
-                    workers.logicWorker.Enqueue(WorkerThreadMessageID.SendDeserializeNetworkMessage, new DeserializeNetworkMessageThreadMessage()
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendDeserializeNetworkMessage, new DeserializeNetworkMessageThreadMessage()
                     {
                         packet = e.Packet,
                         sender = e.Peer.ID,
@@ -147,16 +149,16 @@ namespace RapidNetworkLibrary.Workers
 
         
 
-        internal override void OnConsume(WorkerThreadMessageID messageID, IntPtr data)
+        internal override void OnConsume(ushort messageID, IntPtr data)
         {
             switch (messageID)
             {
 #if SERVER
-                case WorkerThreadMessageID.SendInitializeServer:
+                case (ushort)WorkerThreadMessageID.SendInitializeServer:
                     InitServer(data);
                     break;
 
-                case WorkerThreadMessageID.SendDisconnection:
+                case (ushort)WorkerThreadMessageID.SendDisconnection:
                     var peerID = MemoryHelper.Read<uint> (data);
                     if (peers.ContainsKey(peerID) == true)
                     {
@@ -164,20 +166,20 @@ namespace RapidNetworkLibrary.Workers
                     }
                     break;
 #endif
-                case WorkerThreadMessageID.SendConnectToSocket:
+                case (ushort)WorkerThreadMessageID.SendConnectToSocket:
                     ConnectToSocket(data);
                     break;
 
-                case WorkerThreadMessageID.SendDisconnectionFromPeers:
+                case (ushort)WorkerThreadMessageID.SendDisconnectionFromPeers:
                     me.DisconnectNow(0);
                     break;
 
 #if CLIENT
-                case WorkerThreadMessageID.SendInitClient:
+                case (ushort)WorkerThreadMessageID.SendInitClient:
                     InitializeENetClient(MemoryHelper.Read<byte>(data));
                     break;
 #endif
-                case WorkerThreadMessageID.SendSerializeMessage:
+                case (ushort)WorkerThreadMessageID.SendSerializeMessage:
                     var packetData = MemoryHelper.Read<PacketDataThreadMessage>(data);
                     if(peers.ContainsKey(packetData.target) == true)
                     {
@@ -189,8 +191,16 @@ namespace RapidNetworkLibrary.Workers
                         {
                             enetHost.Broadcast(packetData.channel, ref packetData.payload);
                         }
+                        else
+                        {
+                            packetData.payload.Dispose();
+                        }
                     }
                     
+                    break;
+
+                default:
+                    _extensionManager.OnThreadMessageReceived(ThreadType.Network, messageID, data);
                     break;
 
             }
@@ -226,7 +236,7 @@ namespace RapidNetworkLibrary.Workers
         protected override void Destroy()
         {
             enetHost.Flush();
-            
+            enetHost.Dispose();
             ENet.Library.Deinitialize();
         }
         AllocCallback OnMemoryAllocate = (size) =>

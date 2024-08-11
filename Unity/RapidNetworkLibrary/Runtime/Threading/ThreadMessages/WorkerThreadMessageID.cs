@@ -3,11 +3,9 @@
     SendConnection,
     SendDisconnection,
     SendTimeout,
-
     SendInitializeServer,
     SendConnectToSocket,
     SendInitClient,
-    DontUse,
     SendDeserializeNetworkMessage,
     SendNetworkMessageToGameThread,
     SendPeerData,

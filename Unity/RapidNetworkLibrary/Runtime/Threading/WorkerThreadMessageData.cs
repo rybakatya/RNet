@@ -2,6 +2,6 @@
 
 public struct WorkerThreadHeader
 {
-    public WorkerThreadMessageID messageID;
+    public ushort messageID;
     public IntPtr data;
 }

@@ -19,8 +19,6 @@ namespace RapidNetworkLibrary
         {
             var characters = str.AsSpan();           
             length = characters.Length;
-            //value = Marshal.AllocHGlobal(characters.Length * Marshal.SizeOf<char>());
-            //value = (IntPtr)UnsafeUtility.MallocTracked(characters.Length * Marshal.SizeOf<char>(), 0, Unity.Collections.Allocator.TempJob, 0);
             value = MemoryHelper.Alloc((characters.Length * Marshal.SizeOf<char>()) + 12);
            
             var span = new Span<char>(value.ToPointer(), length);
@@ -39,9 +37,7 @@ namespace RapidNetworkLibrary
         }
         public void Free()
         {
-
             MemoryHelper.Free(value);
-           // Marshal.FreeHGlobal(value);
         }
     }
 }

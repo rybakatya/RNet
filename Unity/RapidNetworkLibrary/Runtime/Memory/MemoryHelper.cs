@@ -14,27 +14,7 @@ namespace RapidNetworkLibrary.Memory
     static unsafe class AllocationTracker
     {
         static readonly ConcurrentDictionary<IntPtr, string> s_Allocations = new ConcurrentDictionary<IntPtr, string>();
-#if UNITY_EDITOR
-        [InitializeOnLoadMethod]
-        static void Initialize()
-        {
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
 
-        static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.ExitingPlayMode)
-            {
-                UnityEngine.Debug.Log("Exiting Play mode");
-                foreach (string trace in s_Allocations.Values)
-                {
-                    UnityEngine.Debug.LogWarningFormat("Detected memory leak, allocated at {0}.", trace);
-                }
-
-                s_Allocations.Clear();
-            }
-        }
-#endif
 
         public static void TrackAllocation(void* pointer, string trace)
         {
@@ -44,58 +24,6 @@ namespace RapidNetworkLibrary.Memory
         public static void UntrackAllocation(void* pointer)
         {
             s_Allocations.TryRemove((IntPtr)pointer, out var val);
-        }
-    }
-
-
-    public abstract class MemoryAllocator
-    {
-        private ConcurrentDictionary<IntPtr, string> allocations = new ConcurrentDictionary<IntPtr, string>();
-
-        public abstract IntPtr Malloc(int size);
-        public abstract void Free(IntPtr ptr);
-
-        protected void TrackAllocation(IntPtr pointer, string trace)
-        {
-            allocations.TryAdd(pointer, trace);
-        }
-
-        protected void UntrackAllocation(IntPtr pointer)
-        {
-            allocations.TryRemove(pointer, out var val);
-        }
-    }
-#if ENABLE_MONO || ENABLE_IL2CPP
-    public class UnityAllocator : MemoryAllocator
-    {
-        public override unsafe void Free(IntPtr ptr)
-        {
-            UntrackAllocation(ptr);
-            UnsafeUtility.Free(ptr.ToPointer(), Unity.Collections.Allocator.Persistent);
-
-        }
-
-        public override unsafe IntPtr Malloc(int size)
-        {
-            var ptr =  (IntPtr)UnsafeUtility.Malloc(size, 0, Unity.Collections.Allocator.Persistent);
-            TrackAllocation(ptr, Environment.StackTrace);
-            return ptr;
-        }
-    }
-#endif
-    public class RNetAllocator : MemoryAllocator
-    {
-        public override IntPtr Malloc(int size)
-        {
-            var ptr = Marshal.AllocHGlobal(size);
-            TrackAllocation(ptr, Environment.StackTrace);
-            return ptr;
-        }
-
-        public override void Free(IntPtr ptr)
-        {
-            UntrackAllocation(ptr);
-            Marshal.FreeHGlobal(ptr);
         }
     }
     public static class MemoryHelper

@@ -22,21 +22,21 @@ namespace RapidNetworkLibrary.Connections
 
         private ushort port;
 
-        public static Connection Create(uint id, NativeString ip, ushort port)
+        internal static Connection Create(uint id, NativeString ip, ushort port)
         {
             return new Connection(id, ip, port);
         }
 
-        public static Connection Create(Connection connection)
+        internal static Connection Create(Connection connection)
         {
             return new Connection(connection);
         }
-        
-        public static void Destroy(Connection connection)
+
+        internal static void Destroy(Connection connection)
         {
             connection.ipAddress.Free();
         }
-        private Connection(uint p, NativeString ip, ushort prt)
+        internal Connection(uint p, NativeString ip, ushort prt)
         {
             peer = p;
             

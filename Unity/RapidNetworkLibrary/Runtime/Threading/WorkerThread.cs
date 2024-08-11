@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace RapidNetworkLibrary.Threading
 {
-    internal abstract class WorkerThread : Worker
+    public abstract class WorkerThread : Worker
     {
 
         protected Thread thread;
@@ -19,14 +19,12 @@ namespace RapidNetworkLibrary.Threading
         {
             thread = new Thread(DoWork);
             thread.IsBackground = true;
-            shouldRun = true;
-
-            
+            shouldRun = true;           
         }
 
         public int timeout = 0;
         private Stopwatch ticker;
-        public void StartThread(int ticksPerSecond)
+        internal void StartThread(int ticksPerSecond)
         {
             timeout = 1000/ticksPerSecond;
             thread.Start();
@@ -49,12 +47,12 @@ namespace RapidNetworkLibrary.Threading
         protected abstract void Init();
         protected abstract void Tick();
         protected abstract void Destroy();
-        internal override void OnDestroy()
+        public override void OnDestroy()
         {
-            Flush();
-            Destroy();
             shouldRun = false;
-            thread.Abort();
+            Flush();
+            Destroy();           
+            thread.Join();
         }
     }
 }

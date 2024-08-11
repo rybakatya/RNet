@@ -12,6 +12,9 @@ using RapidNetworkLibrary.Threading.ThreadMessages;
 
 using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using RapidNetworkLibrary.Memory;
+using System.Diagnostics;
+using System.Numerics;
+using RapidNetworkLibrary.Extensions;
 
 
 
@@ -52,16 +55,17 @@ public struct RNetIPAddress : IEquatable<RNetIPAddress>
 namespace RapidNetworkLibrary.Workers
 {
    
-    internal class LogicWorkerThread : WorkerThread
+    public class LogicWorkerThread : WorkerThread
     {
 
-        public Dictionary<ushort, Serializer> serializers = new Dictionary<ushort, Serializer>();
+        internal Dictionary<ushort, Serializer> serializers = new Dictionary<ushort, Serializer>();
 
         /// <summary>
         /// Called from the logic thread before the update loop begins.
         /// </summary>
         private Action onLogicInit;
 
+        internal Action<Connection, ushort, IntPtr> onSocketReceive;
 #if SERVER
         internal Action<Connection> onSocketConnect;
         
@@ -75,14 +79,19 @@ namespace RapidNetworkLibrary.Workers
         private WorkerCollection workers;
 
         private PacketFreeCallback packetFree;
-        
-        public LogicWorkerThread(Action logicInitAction, WorkerCollection wrk)
+
+        private Stopwatch stopWatch;
+
+        private readonly ExtensionManager _extensionManager;
+        internal LogicWorkerThread(Action logicInitAction, WorkerCollection wrk, ExtensionManager extensionManager)
         {
 
            
             workers = wrk;
 
-            onLogicInit += logicInitAction;           
+            onLogicInit += logicInitAction;     
+            _extensionManager = extensionManager;
+            
         }
 
         private void GetAllSerializers()
@@ -113,8 +122,8 @@ namespace RapidNetworkLibrary.Workers
             }    
         }
 
-        public ConnectionHandler connectionHandler;
-        internal Action<Connection, ushort, IntPtr> onSocketReceive;
+        internal ConnectionHandler connectionHandler;
+        
 
         protected override void Init()
         {
@@ -125,8 +134,10 @@ namespace RapidNetworkLibrary.Workers
             {
                 Console.WriteLine("Waiting for main thread");
             }
-            connectionHandler = new ConnectionHandler(workers);
+            connectionHandler = new ConnectionHandler(workers, _extensionManager);
             GetAllSerializers();
+            stopWatch = new Stopwatch();
+            stopWatch.Start();
             if (onLogicInit != null)
                 onLogicInit();
         }
@@ -140,26 +151,26 @@ namespace RapidNetworkLibrary.Workers
         }
 
 
-        internal override void OnConsume(WorkerThreadMessageID messageID, IntPtr data)
+        internal override void OnConsume(ushort messageID, IntPtr data)
         {
 
             switch (messageID)
             {
-                case WorkerThreadMessageID.SendConnection:
+                case (ushort)WorkerThreadMessageID.SendConnection:
                     var msgData = MemoryHelper.Read<SendConnectionDataThreadMessage>(data);
                     connectionHandler.HandleSocketConnection(msgData.id,msgData.ip, msgData.port);
 
                     break;
 
-                case WorkerThreadMessageID.SendDisconnection:
+                case (ushort)WorkerThreadMessageID.SendDisconnection:
                     connectionHandler.HandleDisconnect(MemoryHelper.Read<uint>(data));
                     break;
 
-                case WorkerThreadMessageID.SendTimeout:
+                case (ushort)WorkerThreadMessageID.SendTimeout:
                     connectionHandler.HandleTimeout(MemoryHelper.Read<uint>(data));
                     break;
 
-                case WorkerThreadMessageID.SendSerializeMessage:
+                case (ushort)WorkerThreadMessageID.SendSerializeMessage:
                     
 
                     var msg = MemoryHelper.Read<SerializeNetworkMessageThreadMessage>(data);
@@ -167,8 +178,12 @@ namespace RapidNetworkLibrary.Workers
                     SerializeOutgoingMessage(msg);
                     break;
 
-                case WorkerThreadMessageID.SendDeserializeNetworkMessage:
+                case (ushort)WorkerThreadMessageID.SendDeserializeNetworkMessage:
                     DeserializeIncomingMessage(MemoryHelper.Read<DeserializeNetworkMessageThreadMessage>(data));
+                    break;
+
+                default:
+                    _extensionManager.OnThreadMessageReceived(ThreadType.Logic, messageID, data);
                     break;
 
 
@@ -191,22 +206,26 @@ namespace RapidNetworkLibrary.Workers
             var msgID = buffer.ReadUShort();
             Logger.Log(LogLevel.Info, "Packet received on logic thread, deserializing...");
 
-            if (msgID == NetworkMessages.informConnectionType)
+            if (msgID == ushort.MaxValue)
             {
 
 
             }
             else
             {
-
+                var ptr = serializers[msgID].Deserialize(buffer);
                 var msgData = new NetworkMessageDataThreadMessage()
                 {
                     messageID = msgID,
-                    messageData = serializers[msgID].Deserialize(buffer),
+                    messageData = ptr,
                     sender = connectionHandler.GetConnection(data.sender)
                 };
 
-                workers.gameWorker.Enqueue(WorkerThreadMessageID.SendNetworkMessageToGameThread, msgData);
+                _extensionManager.OnSocketReceive(ThreadType.Logic, connectionHandler.GetConnection(data.sender), msgID, ptr);
+                if(onSocketReceive != null)
+                    onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
+
+                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread, msgData);
             }
 
             data.packet.Dispose();
@@ -220,21 +239,21 @@ namespace RapidNetworkLibrary.Workers
         
         private unsafe void SerializeOutgoingMessage(SerializeNetworkMessageThreadMessage data)
         {
-            Logger.Log(LogLevel.Info, "Attempting to serialize outgoing message");
+
 
             var buffer = BufferPool.GetBitBuffer();
             buffer.AddUShort(data.id);
             serializers[data.id].Serialize(buffer, data.messageObjectPointer);
+           
 
-            Logger.Log(LogLevel.Info, "Attempting to allocate logic packet");
             var ptr = Marshal.AllocHGlobal(buffer.Length * Marshal.SizeOf<byte>());
-            //var ptr = (IntPtr)UnsafeUtility.MallocTracked(buffer.Length * sizeof(byte), 0, Unity.Collections.Allocator.Persistent, 0);
+            
             var span = new Span<byte>(ptr.ToPointer(), buffer.Length);
             buffer.ToSpan(ref span);
             Packet packet = default(Packet);
             packet.Create(ptr, buffer.Length, data.flags);
             packet.SetFreeCallback(packetFree);
-            workers.socketWorker.Enqueue(WorkerThreadMessageID.SendSerializeMessage, new PacketDataThreadMessage()
+            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendSerializeMessage, new PacketDataThreadMessage()
             {
                 target = data.target,
                 channel = data.channel,
@@ -242,20 +261,20 @@ namespace RapidNetworkLibrary.Workers
             });
 
             MemoryHelper.Free(data.messageObjectPointer);
+            
             buffer.Clear();
         }
         private unsafe void onPacketFree(Packet packet)
         {
-            Logger.Log(LogLevel.Warning, "Freeing packet!");
+
             Marshal.FreeHGlobal(packet.Data);
-            //UnsafeUtility.FreeTracked(packet.Data.ToPointer(), Unity.Collections.Allocator.Persistent);
+            
         }
 
         protected override void Destroy()
         {
-            
+            workers = null;
             connectionHandler.Destroy();
-
         }
     }
 }

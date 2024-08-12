@@ -112,4 +112,47 @@ private void onInit()
 }
 ```
 
-Now include your scene into the build settings and build your client.
+Now include your scene into the build settings and build your client. In the unity toolbar navigate back to ```RNet/SwitchTarget``` and select server. Right now a client can connect but no event has been registered to inform us of the connection. ```RNet.RegisterOnSocketConnectEvent``` is the method we use to register to the connection event. It takes two parameters, an action to be called on the LogicThread when a client connects and an action to be called on the Game(main/unity) Thread. The following are all valid examples on how to use ```RNet.RegisterOnSocketConnectEvent```
+
+```csharp
+RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect);
+RNet.RegisterOnSocketConnectEvent(socketConnectGameAction: GameOnSocketConnect);
+RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect, socketConnectGameAction: GameOnSocketConnect);
+```
+**Tip don't forget to call RNet.UnregisterOnSocket**
+
+Your ```NetworkHandler.cs``` script should now look like this.
+
+```csharp
+    public class NetworkHandler : MonoBehaviour
+    {
+        private void Start()
+        {
+            RNet.Init(onInit);
+        }
+
+        private void onInit()
+        {
+#if SERVER
+            RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect);          
+            RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+#elif CLIENT
+            RNet.InitializeClient(255);
+            RNet.Connect("127.0.0.1", 7777);
+#endif
+        }
+
+        private void LogicOnSocketConnect(Connection connection)
+        {
+            Debug.Log("[Logic Thread]: A connection has been formed between two sockets!");
+        }
+
+        private void Update()
+        {
+            RNet.Tick();
+        }
+    }
+```
+
+Enter playmode in the editor, then launch the recently built client. You should see "[Logic Thread]: A connection has been formed between two sockets!" printed to your unity console.
+

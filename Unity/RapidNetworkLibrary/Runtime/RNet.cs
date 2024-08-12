@@ -19,6 +19,26 @@ namespace RapidNetworkLibrary
         private static Action onInit;
         private static bool isInit;
         private static ExtensionManager extensionManager;
+
+       
+        private static ulong bytesSent;
+        private static ulong bytesReceived;
+        private static uint lastReceiveTime;
+        private static uint lastSendTime;
+        private static uint lastRoundTripTime;
+        private static uint mtu;
+        private static ulong packetsSent;
+        private static ulong packetsLost;
+
+        public static ulong BytesSent { get => bytesSent; internal set => bytesSent = value; }
+        public static ulong BytesReceived { get => bytesReceived; internal set => bytesReceived = value; }
+        public static uint LastReceiveTime { get => lastReceiveTime; internal set => lastReceiveTime = value; }
+        public static uint LastSendTime { get => lastSendTime; internal set => lastSendTime = value; }
+        public static uint LastRoundTripTime { get => lastRoundTripTime; internal set => lastRoundTripTime = value; }
+        public static uint Mtu { get => mtu; internal set => mtu = value; }
+        public static ulong PacketsSent { get => packetsSent; internal set => packetsSent = value; }
+        public static ulong PacketsLost { get => packetsLost; internal set => packetsLost = value; }
+
         public unsafe static void Init(Action initAction, MemoryAllocator alloc = null)
         {
             

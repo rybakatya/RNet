@@ -57,7 +57,9 @@
     <None Remove="Runtime\Connections\InformConnectionSerializer.cs.meta" />
     <None Remove="Runtime\Connections\InformConnectionType.cs.meta" />
     <None Remove="Runtime\Extension.meta" />
+    <None Remove="Runtime\Extension\ExtensionManager.cs.meta" />
     <None Remove="Runtime\Extension\RNetExtension.cs.meta" />
+    <None Remove="Runtime\Extension\ThreadType.cs.meta" />
     <None Remove="Runtime\IdGenerator.cs.meta" />
     <None Remove="Runtime\Logging.meta" />
     <None Remove="Runtime\Logging\Logger.cs.meta" />
@@ -128,6 +130,7 @@
     <None Remove="Runtime\Workers.meta" />
     <None Remove="Runtime\Workers\GameWorker.cs.meta" />
     <None Remove="Runtime\Workers\LogicWorkerThread.cs.meta" />
+    <None Remove="Runtime\Workers\RNetIPAddress.cs.meta" />
     <None Remove="Runtime\Workers\SocketWorkerThread.cs.meta" />
     <None Remove="Runtime\Zones.meta" />
     <None Remove="Runtime\Zones\Cell.cs.meta" />

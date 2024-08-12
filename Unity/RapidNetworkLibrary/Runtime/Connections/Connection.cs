@@ -6,7 +6,7 @@ namespace RapidNetworkLibrary.Connections
 {
     public struct Connection : IEquatable<Connection>
     {
-        private readonly uint peer;
+        private uint peer;
         
 
 
@@ -22,6 +22,21 @@ namespace RapidNetworkLibrary.Connections
 
         private ushort port;
 
+        internal static Connection Create(uint id, NativeString ip, ushort port, ulong sentBytes, ulong receivedBytes, uint receivedLastTime, uint sendLastTime, uint lastRTT, uint _mtu, ulong sentPackets, ulong lostPackets)
+        {
+            return new Connection()
+            {
+                peer = id,
+                bytesSent = sentBytes,
+                bytesReceived = receivedBytes,
+                lastReceiveTime = receivedLastTime,
+                lastSendTime = sendLastTime,
+                lastRoundTripTime = lastRTT,
+                mtu = _mtu,
+                packetsSent = sentPackets,
+                packetsLost = lostPackets
+            };
+        }
         internal static Connection Create(uint id, NativeString ip, ushort port)
         {
             return new Connection(id, ip, port);
@@ -109,7 +124,7 @@ namespace RapidNetworkLibrary.Connections
 
         public override string ToString()
         {
-            return "{ Connection : " + ID;
+            return "{ Connection : " + ID + "}";
         }
     }
 }

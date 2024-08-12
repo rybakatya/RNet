@@ -161,7 +161,7 @@ namespace RapidNetworkLibrary.Workers
 
         private unsafe void DeserializeIncomingMessage(DeserializeNetworkMessageThreadMessage data)
         {
-
+            connectionHandler.SetConnection(data.sender, Connection.Create(data.sender, new NativeString(data.ip.ToString()), data.port, data.bytesSent, data.bytesReceived, data.lastReceiveTime, data.lastSendTime, data.lastRoundTripTime, data.mtu, data.packetsSent, data.packetsLost));
             var buffer = BufferPool.GetBitBuffer();
 
             var span = new ReadOnlySpan<byte>(data.packet.Data.ToPointer(), data.packet.Length);
@@ -191,6 +191,9 @@ namespace RapidNetworkLibrary.Workers
 
                 workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread, msgData);
             }
+
+            
+
 
             data.packet.Dispose();
             data.ip.Free();

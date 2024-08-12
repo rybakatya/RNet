@@ -138,12 +138,28 @@ namespace RapidNetworkLibrary.Workers
                     {
                         packet = e.Packet,
                         sender = e.Peer.ID,
-                        //ip = new NativeString(e.Peer.IP.ToString()),
-                        port = e.Peer.Port
+                        ip = new NativeString(e.Peer.IP.ToString()),
+                        port = e.Peer.Port,
+                        bytesReceived = e.Peer.BytesReceived,
+                        bytesSent = e.Peer.BytesSent,
+                        lastReceiveTime = e.Peer.LastReceiveTime,
+                        lastRoundTripTime = e.Peer.LastRoundTripTime,
+                        lastSendTime = e.Peer.LastSendTime,
+                        mtu = e.Peer.MTU,
+                        packetsLost = e.Peer.PacketsLost,
+                        packetsSent = e.Peer.PacketsSent,
                     });
-                  
+                   
                     break;
             }
+            RNet.BytesReceived = me.BytesReceived;
+            RNet.BytesSent = me.BytesSent;
+            RNet.LastReceiveTime = me.LastReceiveTime;
+            RNet.LastRoundTripTime = me.LastRoundTripTime;
+            RNet.LastSendTime = me.LastSendTime;
+            RNet.Mtu = me.MTU;
+            RNet.PacketsLost = me.PacketsLost;
+            RNet.PacketsSent = me.PacketsSent;
 
         }
 
@@ -151,8 +167,10 @@ namespace RapidNetworkLibrary.Workers
 
         internal override void OnConsume(ushort messageID, IntPtr data)
         {
+
             switch (messageID)
             {
+             
 #if SERVER
                 case (ushort)WorkerThreadMessageID.SendInitializeServer:
                     InitServer(data);

@@ -29,6 +29,87 @@ You will now see a new menu item in the unity menu. Navigate to ```RNet/SwitchTa
 ![image](https://github.com/user-attachments/assets/d1af4aa8-9cfd-409f-84f9-ccf734510c2b)
 
 
+Next we need to make sure our game runs when alt tabbed to do this navigate to Edit/Project Settings/Player and make sure "Run in background" is enabled.
+
+
+
+![image](https://github.com/user-attachments/assets/ed37c7b6-c183-4b8c-8970-97b1a836b0cd)
+
+
 Create a new C# script called ```NetworkHandler.cs``` and paste in the following.
 
+```csharp
+public class NetworkHandler : MonoBehaviour
+{
+    private void Start()
+    {
+        RNet.Init(onInit);
+    }
 
+    private void Update()
+    {
+        RNet.Tick();
+    }
+
+    private void onInit()
+    {
+
+    }
+}
+```
+
+Attach this script to a gameobject in the scene and press play. You should see the following in your unity console.
+
+![image](https://github.com/user-attachments/assets/7061e557-f3c6-4cdb-bd4d-33585c212abc)
+
+
+You can disable the logger from printing to the console by calling ```RNet.DisableLoggerPrinting();``` 
+
+
+Now lets initialize a server, to do this we are going to call ```RNet.InitializeServer(string ip, ushort port, byte maxChannels, ushort maxConnections);``` inside of ```onInit()```
+
+```csharp
+private void onInit()
+{
+    RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+}
+```
+
+You should now be able to see the following in the unity console.
+
+
+![image](https://github.com/user-attachments/assets/d8fcab26-48ab-45da-b3e7-6fd8c2ee309b)
+
+
+Before we make a console we need to make one change. We need to wrap the call to ```RNet.InitializeServer``` in an ```#if SERVER`` statement. This ensures that client builds do not include any server code, and should be used on any server only code you write.
+
+```csharp
+private void onInit()
+{
+#if SERVER
+    RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+#elif CLIENT
+
+#endif
+}
+```
+
+You'll notice that if you try to write anycode within the client statement it will be greyed out.
+
+![image](https://github.com/user-attachments/assets/e4fb3f2c-59ee-4d3c-a154-98b3a4d4ff4d)
+
+To fix this navigate to ```RNet/SwitchTarget``` and select client. Unity will then refresh and if you go back to visual studio you will notice that server is now greyed out and client is not. Your ```onInit()``` method should now look like this. 
+
+```csharp
+private void onInit()
+{
+#if SERVER
+    RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+#elif CLIENT
+    RNet.InitializeClient(255);
+    RNet.Connect("127.0.0.1", 7777);
+#endif
+}
+```
+
+Now include your scene into the build settings and build your client.

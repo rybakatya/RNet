@@ -4,8 +4,6 @@ using RapidNetworkLibrary.Connections;
 using RapidNetworkLibrary.Extensions;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
-
-
 using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using RapidNetworkLibrary.Threading.ThreadMessages;
 using RapidNetworkLibrary.Workers;
@@ -223,10 +221,9 @@ namespace RapidNetworkLibrary
 
 
 
-#if SERVER
 
 
-        public static void RegisterOnSocketConnect(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
+        public static void RegisterOnSocketConnectEvent(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
         {
             if(socketConnectLogicAction != null)
                 workers.logicWorker.onSocketConnect += socketConnectLogicAction;
@@ -235,17 +232,53 @@ namespace RapidNetworkLibrary
                 workers.gameWorker.onSocketConnected += socketConnectGameAction;
         }
         
-#elif CLIENT
-        public static void RegisterOnConnectedToServerEvent(Action<Connection> logicConnectedToServerAction = null, Action<Connection> gameConnectedToServerAction = null)
-        {
-            if(logicConnectedToServerAction != null)
-                workers.logicWorker.onConnectedToServer += logicConnectedToServerAction;
 
-            if (gameConnectedToServerAction != null)
-                workers.gameWorker.onConnectedToServer += gameConnectedToServerAction;
+        public static void UnRegisterOnSocketConnectEvent(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
+        {
+            if( socketConnectLogicAction != null)
+                workers.logicWorker.onSocketConnect -= socketConnectLogicAction;
+
+            if(socketConnectGameAction != null)
+                workers.gameWorker.onSocketConnected -= socketConnectGameAction;
         }
 
-#endif
+        public static void RegisterOnSocketDisconnectEvent(Action<Connection> socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)
+        {
+            if (socketDisconnectGameAction != null)
+                workers.gameWorker.onSocketDisconnected += socketDisconnectGameAction;
+
+            if (socketDisconnectLogicAction != null)
+                workers.logicWorker.onSocketDisconnect += socketDisconnectLogicAction;
+        }
+
+
+        public static void UnRegisterOnSocketDisconnectEvent(Action<Connection> socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)
+        {
+            if (socketDisconnectGameAction != null)
+                workers.gameWorker.onSocketDisconnected -= socketDisconnectGameAction;
+
+            if (socketDisconnectLogicAction != null)
+                workers.logicWorker.onSocketDisconnect -= socketDisconnectLogicAction;
+        }
+
+        public static void RegisterOnSocketTimeoutEvent(Action<Connection> socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)
+        {
+            if (socketTimeoutLogicAction != null)
+                workers.logicWorker.onSocketTimeout += socketTimeoutLogicAction;
+
+            if (socketTimeoutGameAction != null)
+                workers.gameWorker.onSocketTimedout += socketTimeoutGameAction;
+        }
+
+        public static void UnregisterOnSocketTimeoutEvent(Action<Connection> socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)
+        {
+            if (socketTimeoutLogicAction != null)
+                workers.logicWorker.onSocketTimeout -= socketTimeoutLogicAction;
+
+            if (socketTimeoutGameAction != null)
+                workers.gameWorker.onSocketTimedout -= socketTimeoutGameAction;
+        }
+
     }
 
 

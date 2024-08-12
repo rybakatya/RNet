@@ -45,28 +45,26 @@ namespace RapidNetworkLibrary.Connections
 
             var c = Connection.Create(peerID, ip, port);
 
-#if SERVER
-            
-            
-           
+
+            _extensionManager.OnSocketConnect(ThreadType.Logic, c);
 
             connections.Add(peerID, c);
             if (workers.logicWorker.onSocketConnect != null)
                 workers.logicWorker.onSocketConnect(c);
-#elif CLIENT
-            connections.Add(peerID, c);
-            if (workers.logicWorker.onConnectedToServer != null)
-                workers.logicWorker.onConnectedToServer(c);
 
-#endif
 
-            _extensionManager.OnSocketConnect(ThreadType.Logic, c);
+            
             workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnection, c);
         }
 
         internal void HandleDisconnect(uint peer)
         {
             _extensionManager.OnSocketDisconnect(ThreadType.Logic, GetConnection(peer));
+            if (workers.logicWorker.onSocketDisconnect != null)
+                workers.logicWorker.onSocketDisconnect(connections[peer]);
+
+            workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connections[peer]);
+
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
             Logger.Log(LogLevel.Info, "A socket disconnected");
@@ -75,6 +73,10 @@ namespace RapidNetworkLibrary.Connections
         internal void HandleTimeout(uint peer)
         {
             _extensionManager.OnSocketTimeout(ThreadType.Logic, GetConnection(peer));
+            if (workers.logicWorker.onSocketTimeout != null)
+                workers.logicWorker.onSocketDisconnect(connections[peer]);
+
+            workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendTimeout, connections[peer]);
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
             Logger.Log(LogLevel.Info, "A socket timed out");

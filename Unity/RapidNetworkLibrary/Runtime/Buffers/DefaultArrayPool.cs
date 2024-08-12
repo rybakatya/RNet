@@ -21,9 +21,9 @@
  */
 
 using System;
-using RapidNetworkLibrary.Buffers;
 
-namespace NetStack.Buffers
+
+namespace RapidNetworkLibrary.Buffers
 {
     internal sealed partial class DefaultArrayPool<T> : ArrayPool<T> {
 		private const int DefaultMaxArrayLength = 1024 * 1024;

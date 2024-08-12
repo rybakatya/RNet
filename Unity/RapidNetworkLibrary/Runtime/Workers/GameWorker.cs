@@ -10,14 +10,13 @@ namespace RapidNetworkLibrary.Workers
 {
     public class GameWorker : Worker
     {
-#if SERVER
-        public Action<Connection> onSocketConnected;
 
-        public Action<uint> test;
-#elif CLIENT
-        public Action<Connection> onConnectedToServer;
-#endif
+        public Action<Connection> onSocketConnected;
+        public Action<Connection> onSocketDisconnected;
+        public Action<Connection> onSocketTimedout;
+
         public Action<Connection, ushort, IntPtr> onSocketReceive;
+        
 
         private readonly WorkerCollection _workers;
         private readonly ExtensionManager _extensionManager;
@@ -36,20 +35,25 @@ namespace RapidNetworkLibrary.Workers
                 case (ushort)WorkerThreadMessageID.SendConnection:
                     var connection = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketConnect(ThreadType.Game,connection);
-
-#if SERVER
                     
-                    
-                        if(onSocketConnected != null)
-                            onSocketConnected(connection);
-                    
-#elif CLIENT
-                    if (onConnectedToServer != null)
-                        onConnectedToServer(connection);
-#endif
-                    
+                    if(onSocketConnected != null)
+                        onSocketConnected(connection);                  
                     break;
 
+                case (ushort)WorkerThreadMessageID.SendDisconnection:
+                    var con = MemoryHelper.Read<Connection>(data);
+                    _extensionManager.OnSocketDisconnect(ThreadType.Game,con);
+                    if(onSocketDisconnected != null) 
+                        onSocketDisconnected(con);
+                    break;
+
+
+                case (ushort)WorkerThreadMessageID.SendTimeout:
+                    var c = MemoryHelper.Read<Connection>(data);
+                    _extensionManager.OnSocketTimeout(ThreadType.Game, c);
+                    if(onSocketTimedout != null)
+                        onSocketTimedout(c);
+                    break;
 
                 case (ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread:
                     var msgData = MemoryHelper.Read<NetworkMessageDataThreadMessage>(data);
@@ -71,7 +75,7 @@ namespace RapidNetworkLibrary.Workers
             }
         }
 
-        public void Tick()
+        internal void Tick()
         {
             Consume();           
         }

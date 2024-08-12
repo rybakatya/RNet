@@ -3,9 +3,9 @@
 
 namespace RapidNetworkLibrary.Logging
 {
-    internal class Logger
+    public class Logger
     {
-        internal static void Log(LogLevel level, string msg)
+        public static void Log(LogLevel level, string msg)
         {
             msg = "[LOGGER]: " + msg;
             switch (level)

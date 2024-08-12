@@ -57,12 +57,15 @@
     <None Remove="Runtime\Connections\InformConnectionSerializer.cs.meta" />
     <None Remove="Runtime\Connections\InformConnectionType.cs.meta" />
     <None Remove="Runtime\Extension.meta" />
+    <None Remove="Runtime\Extension\RNetExtension.cs.meta" />
     <None Remove="Runtime\IdGenerator.cs.meta" />
     <None Remove="Runtime\Logging.meta" />
     <None Remove="Runtime\Logging\Logger.cs.meta" />
     <None Remove="Runtime\Logging\LogLevel.cs.meta" />
     <None Remove="Runtime\Memory.meta" />
+    <None Remove="Runtime\Memory\MemoryAllocator.cs.meta" />
     <None Remove="Runtime\Memory\MemoryHelper.cs.meta" />
+    <None Remove="Runtime\Memory\RNetAllocator.cs.meta" />
     <None Remove="Runtime\Memory\Smmalloc.cs.meta" />
     <None Remove="Runtime\NativeString.cs.meta" />
     <None Remove="Runtime\Replication.meta" />

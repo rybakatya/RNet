@@ -1,7 +1,7 @@
 ﻿using RapidNetworkLibrary.Serialization;
 using System;
 
-static class BufferPool
+internal static class BufferPool
 {
     [ThreadStatic]
     private static BitBuffer bitBuffer;

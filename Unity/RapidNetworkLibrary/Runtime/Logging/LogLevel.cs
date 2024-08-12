@@ -1,6 +1,6 @@
 ﻿namespace RapidNetworkLibrary.Logging
 {
-    internal enum LogLevel
+    public enum LogLevel
     {
         Info,
         Warning,

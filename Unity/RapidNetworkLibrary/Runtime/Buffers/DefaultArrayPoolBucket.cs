@@ -25,7 +25,7 @@ using System.Diagnostics;
 using System.Threading;
 using RapidNetworkLibrary.Buffers;
 
-namespace NetStack.Buffers
+namespace RapidNetworkLibrary.Buffers
 {
     internal sealed partial class DefaultArrayPool<T> : ArrayPool<T> {
 		private sealed class Bucket {

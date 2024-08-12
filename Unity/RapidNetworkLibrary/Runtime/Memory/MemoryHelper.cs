@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
 
@@ -11,21 +10,6 @@ using UnityEditor;
 
 namespace RapidNetworkLibrary.Memory
 {
-    static unsafe class AllocationTracker
-    {
-        static readonly ConcurrentDictionary<IntPtr, string> s_Allocations = new ConcurrentDictionary<IntPtr, string>();
-
-
-        public static void TrackAllocation(void* pointer, string trace)
-        {
-            s_Allocations.TryAdd((IntPtr)pointer, trace);
-        }
-
-        public static void UntrackAllocation(void* pointer)
-        {
-            s_Allocations.TryRemove((IntPtr)pointer, out var val);
-        }
-    }
     public static class MemoryHelper
     {
         private static MemoryAllocator allocator;

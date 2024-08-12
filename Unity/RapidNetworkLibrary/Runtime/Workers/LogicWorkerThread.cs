@@ -16,45 +16,9 @@ using System.Diagnostics;
 using System.Numerics;
 using RapidNetworkLibrary.Extensions;
 
-
-
-
-public struct RNetIPAddress : IEquatable<RNetIPAddress>
-{
-    public string ip;
-    public ushort port;
-
-    public RNetIPAddress(string ip, ushort port)
-    {
-        this.ip = ip;
-        this.port = port;
-    }
-    public bool Equals(RNetIPAddress other)
-    {
-        if(other.ip.Equals(ip) && other.port == port)
-            return true;
-        return false;
-    }
-
-    public override bool Equals(object obj)
-    {
-        return base.Equals(obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(ip, port);
-    }
-
-    public override string ToString()
-    {
-        return base.ToString();
-    }
-}
-
 namespace RapidNetworkLibrary.Workers
 {
-   
+
     public class LogicWorkerThread : WorkerThread
     {
 
@@ -66,12 +30,12 @@ namespace RapidNetworkLibrary.Workers
         private Action onLogicInit;
 
         internal Action<Connection, ushort, IntPtr> onSocketReceive;
-#if SERVER
+
         internal Action<Connection> onSocketConnect;
         
-#elif CLIENT
-        internal Action<Connection> onConnectedToServer;
-#endif
+        internal Action<Connection> onSocketDisconnect;
+
+        internal Action<Connection> onSocketTimeout;
 
 
 

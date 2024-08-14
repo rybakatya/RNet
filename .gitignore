@@ -362,3 +362,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Unity/RNetUnityDemo
 /Unity/My project
+/Unity/RapidNetworkLibrary/Editor/Extensions/ExtensionWindowTab.cs.meta
+/Unity/RapidNetworkLibrary/Editor/Extensions.meta

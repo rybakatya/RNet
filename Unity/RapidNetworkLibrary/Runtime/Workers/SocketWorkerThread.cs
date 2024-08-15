@@ -152,15 +152,18 @@ namespace RapidNetworkLibrary.Workers
                    
                     break;
             }
-            RNet.BytesReceived = me.BytesReceived;
-            RNet.BytesSent = me.BytesSent;
-            RNet.LastReceiveTime = me.LastReceiveTime;
-            RNet.LastRoundTripTime = me.LastRoundTripTime;
-            RNet.LastSendTime = me.LastSendTime;
-            RNet.Mtu = me.MTU;
-            RNet.PacketsLost = me.PacketsLost;
-            RNet.PacketsSent = me.PacketsSent;
 
+            if (me.IsSet == true)
+            {
+                RNet.BytesReceived = me.BytesReceived;
+                RNet.BytesSent = me.BytesSent;
+                RNet.LastReceiveTime = me.LastReceiveTime;
+                RNet.LastRoundTripTime = me.LastRoundTripTime;
+                RNet.LastSendTime = me.LastSendTime;
+                RNet.Mtu = me.MTU;
+                RNet.PacketsLost = me.PacketsLost;
+                RNet.PacketsSent = me.PacketsSent;
+            }
         }
 
         

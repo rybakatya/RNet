@@ -362,3 +362,7 @@ FodyWeavers.xsd
 
 /Unity/sample/Library
 /Unity/sample/Temp
+/Unity/sample/UserSettings
+/Unity/sample/Assembly-CSharp.csproj
+/Unity/sample/rybakatya.rnet.csproj
+/Unity/sample/rybakatya.rnet.editor.csproj

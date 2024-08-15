@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "com.rybakatya.enet": "https://github.com/rybakatya/RapidNet.git?path=/Unity/ENet",
+    "com.rybakatya.rnet": "https://github.com/rybakatya/RapidNet.git?path=/Unity/RapidNetworkLibrary",
     "com.unity.collab-proxy": "2.0.5",
     "com.unity.feature.development": "1.0.1",
     "com.unity.textmeshpro": "3.0.6",

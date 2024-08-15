@@ -111,8 +111,8 @@ private void onInit()
 #endif
 }
 ```
-
-Now include your scene into the build settings and build your client. In the unity toolbar navigate back to ```RNet/SwitchTarget``` and select server. Right now a client can connect but no event has been registered to inform us of the connection. ```RNet.RegisterOnSocketConnectEvent``` is the method we use to register to the connection event. It takes two parameters, an action to be called on the LogicThread when a client connects and an action to be called on the Game(main/unity) Thread. The following are all valid examples on how to use ```RNet.RegisterOnSocketConnectEvent```
+# Managing  Connections
+Include your scene into the build settings and build your client. In the unity toolbar navigate back to ```RNet/SwitchTarget``` and select server. Right now a client can connect but no event has been registered to inform us of the connection. ```RNet.RegisterOnSocketConnectEvent``` is the method we use to register to the connection event. It takes two parameters, an action to be called on the LogicThread when a client connects and an action to be called on the Game(main/unity) Thread. The following are all valid examples on how to use ```RNet.RegisterOnSocketConnectEvent```
 
 ```csharp
 RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect);
@@ -159,4 +159,57 @@ public class NetworkHandler : MonoBehaviour
 ```
 
 Enter playmode in the editor, then launch the recently built client. You should see "[Logic Thread]: A connection has been formed between two sockets!" printed to your unity console.
+
+# Sending Messages
+
+In the unity editor toolbar navigate  to ```RNet/Main```, click the messages button on the left hand side. Type ```PlayerUpdateNetMessage``` then click create.
+
+![image](https://github.com/user-attachments/assets/170fd27e-17e9-4c49-a1a4-454005827bc0)
+
+Expand the ```PlayerUpdateNetMessage``` popout and expand the ```fields``` popout. You will notice, id and name are readonly and can not be edited. We are going to add 3 fields, press the + button 3 times. And fill  them out as follows.
+
+![image](https://github.com/user-attachments/assets/97e70df9-8b87-4566-b288-088b8b6577a5)
+**Tip ensure ```Generate Serializer``` is checked**
+
+Press save, this is going to generate 3 files, in ```Assets/_code/generated/messages``` if you open them and inspect their values you will see the following 
+
+```csharp
+public class NetworkMessageIDS
+{
+    public const ushort PlayerUpdateNetMessage = 1;
+}
+
+public struct PlayerUpdateNetMessage : IMessageObject
+{
+    public int gold;
+    public byte health;
+    public byte armor;
+}
+
+[Serializer(NetworkMessageIDS.PlayerUpdateNetMessage)]
+public class PlayerUpdateNetMessageSerializer : Serializer
+{
+    public override void Serialize(BitBuffer buffer, IntPtr messageData)
+    {
+        var msg = MemoryHelper.Read<PlayerUpdateNetMessage>(messageData);
+        buffer.AddInt(msg.gold);
+        buffer.AddByte(msg.health);
+        buffer.AddByte(msg.armor);
+    }
+    public override IntPtr Deserialize(BitBuffer buffer)
+    {
+        var msg = new PlayerUpdateNetMessage()
+        {
+            gold = buffer.ReadInt(),
+            health = buffer.ReadByte(),
+            armor = buffer.ReadByte(),
+        };
+        return MemoryHelper.Write(msg);
+    }
+}
+```
+**Tip Never edit the generated files  directly always make your changes in the RNet menu**
+
+A few things to note going on here,  ```NetworkMessageIDS``` holds the values that the network message id generate feeds. You do not have to manage these ids. Also note the attribute on ```PlayerUpdateNetMessageSerializer``` this is how  serializers are tied to specific messages internally.  You can uncheck generate serializer if you have some outlying cases that need hand written code. But it  advised to use the generated code as it is less prone to mistakes.
+
 

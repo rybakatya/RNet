@@ -44,6 +44,7 @@ namespace RapidNetworkLibrary.Editor
         }
 
         string name = string.Empty;
+       
         public override void OnGUI()
         {
             GUILayout.BeginVertical();
@@ -61,7 +62,8 @@ namespace RapidNetworkLibrary.Editor
                     {
                         GenerateMessageIDSStruct();
                         GenerateMessageDataStruct(msg.Value);
-                        GenerateMessageSerializer(msg.Value);
+                        if(msg.Value.generateSerializer == true)
+                            GenerateMessageSerializer(msg.Value);
                         
                     }
                     if (GUILayout.Button("Delete"))
@@ -76,6 +78,8 @@ namespace RapidNetworkLibrary.Editor
                         GUILayout.EndVertical();
                         return;
                     }
+                    GUILayout.Label("Generate Serializer");
+                    msg.Value.generateSerializer = EditorGUILayout.Toggle(msg.Value.generateSerializer, GUILayout.MaxWidth(15));
                     GUILayout.EndHorizontal();
                     GUILayout.EndVertical();
                 }
@@ -237,7 +241,7 @@ namespace RapidNetworkLibrary.Editor
             structStr.AppendLine("{");
             foreach (var field in msg.fields)
             {
-                structStr.AppendLine("    public " + field.fieldType.ToString().ToLower() + " " + field.fieldName + ";");
+                structStr.AppendLine("    public " + field.fieldType.ToFriendlyString() + " " + field.fieldName + ";");
             }
             structStr.AppendLine("}");
 
@@ -348,6 +352,29 @@ namespace RapidNetworkLibrary.Editor
         {
             currentTab.OnDestroy();
             tabs.Clear();
+        }
+    }
+
+    public class ReadOnlyAttribute : PropertyAttribute { }
+
+
+
+    // Put this script in the "Editor" folder
+    [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
+    public class ReadOnlyDrawer : PropertyDrawer
+    {
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return EditorGUI.GetPropertyHeight(property, label, true);
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+
+            GUI.enabled = false;
+            EditorGUI.PropertyField(position, property, label, true);
+            GUI.enabled = true;
         }
     }
 }

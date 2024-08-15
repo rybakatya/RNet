@@ -5,14 +5,14 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "ddeda359f5b91f3472c7f6080c6675afe0ba14f2"
+      "hash": "7f6fd155a42480c7347228ba20427406a2afcc5e"
     },
     "com.rybakatya.rnet": {
       "version": "https://github.com/rybakatya/RapidNet.git?path=/Unity/RapidNetworkLibrary",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "ddeda359f5b91f3472c7f6080c6675afe0ba14f2"
+      "hash": "7f6fd155a42480c7347228ba20427406a2afcc5e"
     },
     "com.unity.collab-proxy": {
       "version": "2.0.5",

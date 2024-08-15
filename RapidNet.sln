@@ -1,18 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.33801.447
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unity", "Unity", "{D865698B-5CED-48F4-92BA-D70A7B2AA1AF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RapidNetworkLibrary", "Unity\RapidNetworkLibrary\RapidNetworkLibrary.csproj", "{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{64296D5F-0380-4AC6-A930-AFC8201FB39B}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ENet", "Unity\ENet\ENet.csproj", "{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ENet", "ENet\ENet.csproj", "{F8E726FC-4996-4616-8BEE-4ED3B5C41503}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RNet", "RNet\RNet.csproj", "{F0567100-4DC8-4199-9D4A-900C7CC76521}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,25 +19,21 @@ Global
 		ServerDebug|x64 = ServerDebug|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}.ClientDebug|x64.ActiveCfg = ClientDebug|x64
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}.ClientDebug|x64.Build.0 = ClientDebug|x64
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}.Debug|x64.ActiveCfg = ServerDebug|x64
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}.Debug|x64.Build.0 = ServerDebug|x64
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F}.ServerDebug|x64.Build.0 = ServerDebug|x64
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}.ClientDebug|x64.ActiveCfg = ClientDebug|x64
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}.ClientDebug|x64.Build.0 = ClientDebug|x64
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}.Debug|x64.ActiveCfg = Debug|x64
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}.Debug|x64.Build.0 = Debug|x64
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233}.ServerDebug|x64.Build.0 = ServerDebug|x64
+		{F8E726FC-4996-4616-8BEE-4ED3B5C41503}.ClientDebug|x64.ActiveCfg = ClientDebug|x64
+		{F8E726FC-4996-4616-8BEE-4ED3B5C41503}.ClientDebug|x64.Build.0 = ClientDebug|x64
+		{F8E726FC-4996-4616-8BEE-4ED3B5C41503}.Debug|x64.ActiveCfg = Debug|x64
+		{F8E726FC-4996-4616-8BEE-4ED3B5C41503}.Debug|x64.Build.0 = Debug|x64
+		{F8E726FC-4996-4616-8BEE-4ED3B5C41503}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
+		{F8E726FC-4996-4616-8BEE-4ED3B5C41503}.ServerDebug|x64.Build.0 = ServerDebug|x64
+		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ClientDebug|x64.ActiveCfg = ClientDebug|x64
+		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ClientDebug|x64.Build.0 = ClientDebug|x64
+		{F0567100-4DC8-4199-9D4A-900C7CC76521}.Debug|x64.ActiveCfg = ServerDebug|x64
+		{F0567100-4DC8-4199-9D4A-900C7CC76521}.Debug|x64.Build.0 = ServerDebug|x64
+		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
+		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ServerDebug|x64.Build.0 = ServerDebug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{F2A61E6A-1428-4EAB-B1EF-9D71189A6A3F} = {D865698B-5CED-48F4-92BA-D70A7B2AA1AF}
-		{2040DF3D-96E8-425E-AB5D-70FFB8B6A233} = {D865698B-5CED-48F4-92BA-D70A7B2AA1AF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11538501-846C-4CE7-9AA6-3D197CC5FDE1}

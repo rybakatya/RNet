@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace RapidNetworkLibrary
 {
-    internal class IDGenerator
+    public class IDGenerator
     {
         public List<ushort> ids;
-        public IDGenerator(int size)
+        public IDGenerator(ushort size)
         {
             ids = new List<ushort>(size);
-            for (ushort i = 0; i < size; i++)
+            for (ushort i = size; i > 0; i--)
             {
                 ids.Add(i);
             }

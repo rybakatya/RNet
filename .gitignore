@@ -195,10 +195,7 @@ PublishScripts/
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
-# The packages folder can be ignored because of Package Restore
-**/[Pp]ackages/*
-# except build/, which is used as an MSBuild target.
-!**/[Pp]ackages/build/
+
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
@@ -362,5 +359,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /Unity/RNetUnityDemo
 /Unity/My project
-/Unity/RapidNetworkLibrary/Editor/Extensions/ExtensionWindowTab.cs.meta
-/Unity/RapidNetworkLibrary/Editor/Extensions.meta
+
+/Unity/sample/Library
+/Unity/sample/Temp

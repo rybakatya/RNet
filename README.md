@@ -141,8 +141,8 @@ public class NetworkHandler : MonoBehaviour
         RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect);
         RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
 #elif CLIENT
-            RNet.InitializeClient(255);
-            RNet.Connect("127.0.0.1", 7777);
+        RNet.InitializeClient(255);
+        RNet.Connect("127.0.0.1", 7777);
 #endif
     }
 

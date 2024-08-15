@@ -119,6 +119,7 @@ RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect
 RNet.RegisterOnSocketConnectEvent(socketConnectGameAction: GameOnSocketConnect);
 RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect, socketConnectGameAction: GameOnSocketConnect);
 ```
+
 **Tip don't forget to call RNet.UnregisterOnSocket**
 
 Your ```NetworkHandler.cs``` script should now look like this.

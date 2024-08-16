@@ -25,6 +25,9 @@ using System.Runtime.InteropServices;
 
 namespace RapidNetworkLibrary.Serialization
 {
+    /// <summary>
+    /// Helper class used to convert floats to ushorts before sending over the network to preserve bandwidth
+    /// </summary>
     public static class HalfPrecision
     {
         [StructLayout(LayoutKind.Explicit)]
@@ -38,6 +41,12 @@ namespace RapidNetworkLibrary.Serialization
             public uint u;
         }
 
+
+        /// <summary>
+        /// Converts a float to a ushort
+        /// </summary>
+        /// <param name="value">float to convert</param>
+        /// <returns>converted ushort</returns>
         [MethodImpl(256)]
         public static ushort Quantize(float value)
         {
@@ -49,7 +58,7 @@ namespace RapidNetworkLibrary.Serialization
             return Quantize(values.i);
         }
 
-        public static ushort Quantize(int value)
+        internal static ushort Quantize(int value)
         {
             int s = value >> 16 & 0x00008000;
             int e = (value >> 23 & 0X000000FF) - (127 - 15);
@@ -95,6 +104,12 @@ namespace RapidNetworkLibrary.Serialization
             return (ushort)(s | e << 10 | m >> 13);
         }
 
+
+        /// <summary>
+        /// Takes ushort returned by HalfPrecision.Quantize and returns the original float.
+        /// </summary>
+        /// <param name="value">Quantized Float</param>
+        /// <returns>Dequantized Float</returns>
         public static float Dequantize(ushort value)
         {
             uint result;

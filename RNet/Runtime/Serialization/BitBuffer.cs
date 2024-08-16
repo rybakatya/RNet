@@ -8,6 +8,9 @@ using System.Text;
 
 namespace RapidNetworkLibrary.Serialization
 {
+    /// <summary>
+    /// Class used to write values to a buffer that can be converted to a span  of bytes to send over the network. Can also read data from a span of bytes.
+    /// </summary>
     public class BitBuffer
     {
         private const int defaultCapacity = 375; // 375 * 4 = 1500 bytes
@@ -20,13 +23,21 @@ namespace RapidNetworkLibrary.Serialization
         private int nextPosition;
         private uint[] chunks;
 
-        public BitBuffer(int capacity = defaultCapacity)
+        /// <summary>
+        /// Creates a new buffer, each bucket of the buffer is 4 bytes meaning passing 375 as the numberOfBuckets will create a buffer that can hold 1500 bytes of data.
+        /// </summary>
+        /// <param name="numberOfBuckets">Number of buffer buckets</param>
+        public BitBuffer(int numberOfBuckets = defaultCapacity)
         {
             readPosition = 0;
             nextPosition = 0;
-            chunks = new uint[capacity];
+            chunks = new uint[numberOfBuckets];
         }
+       
 
+        /// <summary>
+        /// Returns the length of the buffer in bytes.
+        /// </summary>
         public int Length
         {
             get
@@ -35,6 +46,9 @@ namespace RapidNetworkLibrary.Serialization
             }
         }
 
+        /// <summary>
+        /// returns true if buffer is finished reading or writing.
+        /// </summary>
         public bool IsFinished
         {
             get
@@ -43,6 +57,10 @@ namespace RapidNetworkLibrary.Serialization
             }
         }
 
+
+        /// <summary>
+        /// clears all data from the buffer.
+        /// </summary>
         [MethodImpl(256)]
         public void Clear()
         {
@@ -50,6 +68,13 @@ namespace RapidNetworkLibrary.Serialization
             nextPosition = 0;
         }
 
+
+        /// <summary>
+        /// Adds raw bits to the buffer.
+        /// </summary>
+        /// <param name="numBits"></param>
+        /// <param name="value"></param>
+        
         [MethodImpl(256)]
         public BitBuffer Add(int numBits, uint value)
         {
@@ -71,6 +96,12 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+
+        /// <summary>
+        /// reads raw bits from the buffer.+
+        /// </summary>
+        /// <param name="numBits"></param>
+        /// <returns>Value read from the buffer</returns>
         [MethodImpl(256)]
         public uint Read(int numBits)
         {
@@ -81,6 +112,12 @@ namespace RapidNetworkLibrary.Serialization
             return result;
         }
 
+
+        /// <summary>
+        /// Peeks raw bits from the buffer without advancing the read position.
+        /// </summary>
+        /// <param name="numBits"></param>
+        /// <returns>Value peeked from the buffer</returns>
         [MethodImpl(256)]
         public uint Peek(int numBits)
         {
@@ -100,6 +137,12 @@ namespace RapidNetworkLibrary.Serialization
             return (uint)result;
         }
 
+
+        /// <summary>
+        /// Stores the data in the buffer to the provided array.
+        /// </summary>
+        /// <param name="data">array to store the buffer data into.</param>
+        /// <returns>array length</returns>
         public int ToArray(byte[] data)
         {
             Add(1, 1);
@@ -128,6 +171,12 @@ namespace RapidNetworkLibrary.Serialization
             return Length;
         }
 
+
+        /// <summary>
+        /// Creates a buffer of data from the provided array
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="length"></param>
         public void FromArray(byte[] data, int length)
         {
             int numChunks = length / 4 + 1;
@@ -161,34 +210,44 @@ namespace RapidNetworkLibrary.Serialization
             readPosition = 0;
         }
 
+        /// <summary>
+        /// Stores the data in the buffer to the provided Span.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>Length of the span.</returns>
+        public int ToSpan(ref Span<byte> data) {
+            Add(1, 1);
 
-			public int ToSpan(ref Span<byte> data) {
-				Add(1, 1);
+            int numChunks = (nextPosition >> 5) + 1;
+            int length = data.Length;
 
-				int numChunks = (nextPosition >> 5) + 1;
-				int length = data.Length;
+            for (int i = 0; i < numChunks; i++) {
+                int dataIdx = i * 4;
+                uint chunk = chunks[i];
 
-				for (int i = 0; i < numChunks; i++) {
-					int dataIdx = i * 4;
-					uint chunk = chunks[i];
+                if (dataIdx < length)
+                    data[dataIdx] = (byte)(chunk);
 
-					if (dataIdx < length)
-						data[dataIdx] = (byte)(chunk);
+                if (dataIdx + 1 < length)
+                    data[dataIdx + 1] = (byte)(chunk >> 8);
 
-					if (dataIdx + 1 < length)
-						data[dataIdx + 1] = (byte)(chunk >> 8);
+                if (dataIdx + 2 < length)
+                    data[dataIdx + 2] = (byte)(chunk >> 16);
 
-					if (dataIdx + 2 < length)
-						data[dataIdx + 2] = (byte)(chunk >> 16);
+                if (dataIdx + 3 < length)
+                    data[dataIdx + 3] = (byte)(chunk >> 24);
+            }
 
-					if (dataIdx + 3 < length)
-						data[dataIdx + 3] = (byte)(chunk >> 24);
-				}
+            return Length;
+        }
 
-				return Length;
-			}
-
-			public void FromSpan(ref ReadOnlySpan<byte> data, int length) {
+        /// <summary>
+        /// Stores the data from the ReadOnlySpan into the buffer.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="length"></param>
+		public void FromSpan(ref ReadOnlySpan<byte> data, int length) 
+        {
 				int numChunks = (length / 4) + 1;
 
 				if (chunks.Length < numChunks)
@@ -220,6 +279,11 @@ namespace RapidNetworkLibrary.Serialization
 			}
 
 
+        /// <summary>
+        /// Adds a bool to the buffer advancing the position by one byte.
+        /// </summary>
+        /// <param name="value">value to add to the buffer</param>
+
         [MethodImpl(256)]
         public BitBuffer AddBool(bool value)
         {
@@ -228,18 +292,33 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+
+        /// <summary>
+        /// Reads a bool from the buffer advancing the position by one byte.
+        /// </summary>
+        /// <returns>value read from the buffer</returns>
         [MethodImpl(256)]
         public bool ReadBool()
         {
             return Read(1) > 0;
         }
 
+        /// <summary>
+        /// Reads a bool from the buffer without advancing the position.
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(256)]
         public bool PeekBool()
         {
             return Peek(1) > 0;
         }
 
+
+        /// <summary>
+        /// Adds a byte to the buffer advancing the position one byte.
+        /// </summary>
+        /// <param name="value">the value to add to the buffer</param>
+        /// <returns>value peeked from the buffer</returns>
         [MethodImpl(256)]
         public BitBuffer AddByte(byte value)
         {
@@ -248,17 +327,33 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+
+        /// <summary>
+        /// Reads a byte from the buffer advancing the position one byte.
+        /// </summary>
+        /// <returns>value read from the buffer</returns>
         [MethodImpl(256)]
         public byte ReadByte()
         {
             return (byte)Read(8);
         }
 
+
+        /// <summary>
+        /// Reads a byte from the buffer without advancing the position.
+        /// </summary>
+        /// <returns>byte peeked from the buffer</returns>
         [MethodImpl(256)]
         public byte PeekByte()
         {
             return (byte)Peek(8);
         }
+
+        /// <summary>
+        /// Adds a short to the buffer advancing the position two bytes.
+        /// </summary>
+        /// <param name="value">value to add to the buffer</param>
+        /// <returns></returns>
 
         [MethodImpl(256)]
         public BitBuffer AddShort(short value)
@@ -268,18 +363,33 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+
+        /// <summary>
+        /// Reads a short from the buffer advancing the position two bytes.
+        /// </summary>
+        /// <returns>the value read from the buffer</returns>
         [MethodImpl(256)]
         public short ReadShort()
         {
             return (short)ReadInt();
         }
 
+
+        /// <summary>
+        /// Reads a short from the buffer without advancing the position.
+        /// </summary>
+        /// <returns>the value peeked from the buffer</returns>
         [MethodImpl(256)]
         public short PeekShort()
         {
             return (short)PeekInt();
         }
 
+
+        /// <summary>
+        /// Adds a ushort to the buffer advancing the position 2 bytes.
+        /// </summary>
+        /// <param name="value">The value to add to the buffer.</param>
         [MethodImpl(256)]
         public BitBuffer AddUShort(ushort value)
         {
@@ -288,18 +398,30 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Reads a ushort from the buffer advancing  the position  2 bytes.
+        /// </summary>
+        /// <returns>the value read from the buffer.</returns>
         [MethodImpl(256)]
         public ushort ReadUShort()
         {
             return (ushort)ReadUInt();
         }
 
+        /// <summary>
+        /// Reads a  ushort from the buffer without advancing the position.
+        /// </summary>
+        /// <returns>the value peeked from the buffer.</returns>
         [MethodImpl(256)]
         public ushort PeekUShort()
         {
             return (ushort)PeekUInt();
         }
 
+        /// <summary>
+        /// Adds an int to the buffer advancing the position 4 bytes.
+        /// </summary>
+        /// <param name="value">the value to add to the buffer</param>
         [MethodImpl(256)]
         public BitBuffer AddInt(int value)
         {
@@ -310,6 +432,10 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Reads an int from the buffer advancing the position  4 bytes.
+        /// </summary>
+        /// <returns>the value read from the buffer.</returns>
         [MethodImpl(256)]
         public int ReadInt()
         {
@@ -319,6 +445,11 @@ namespace RapidNetworkLibrary.Serialization
             return zagzig;
         }
 
+
+        /// <summary>
+        /// Reads an int from the buffer without advancing the position.
+        /// </summary>
+        /// <returns>The value peeked from the buffer.</returns>
         [MethodImpl(256)]
         public int PeekInt()
         {
@@ -328,6 +459,12 @@ namespace RapidNetworkLibrary.Serialization
             return zagzig;
         }
 
+
+        /// <summary>
+        /// Adds a uint to the buffer advancing the position 4 bytes.
+        /// </summary>
+        /// <param name="value">The value to add to the buffer.</param>
+       
         [MethodImpl(256)]
         public BitBuffer AddUInt(uint value)
         {
@@ -349,6 +486,10 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Reads a uint from the buffer advancing the position 4 bytes.
+        /// </summary>
+        /// <returns>the value read from the buffer.</returns>
         [MethodImpl(256)]
         public uint ReadUInt()
         {
@@ -369,6 +510,11 @@ namespace RapidNetworkLibrary.Serialization
             return value;
         }
 
+
+        /// <summary>
+        /// Reads a uint from the buffer without advancing its position.
+        /// </summary>
+        /// <returns>The value peeked from the buffer.</returns>
         [MethodImpl(256)]
         public uint PeekUInt()
         {
@@ -380,6 +526,10 @@ namespace RapidNetworkLibrary.Serialization
             return value;
         }
 
+        /// <summary>
+        /// Adds a long to the buffer advancing the position 8 bytes.
+        /// </summary>
+        /// <param name="value">the value to add to the buffer.</param>
         [MethodImpl(256)]
         public BitBuffer AddLong(long value)
         {
@@ -389,6 +539,10 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Reads a long from the buffer advancing the position by 8 bytes.
+        /// </summary>
+        /// <returns>The value read from the buffer.</returns>
         [MethodImpl(256)]
         public long ReadLong()
         {
@@ -398,6 +552,11 @@ namespace RapidNetworkLibrary.Serialization
 
             return value << 32 | (uint)low;
         }
+
+        /// <summary>
+        /// Reads a long from the buffer without advancing the position.
+        /// </summary>
+        /// <returns>the value peeked from the buffer</returns>
 
         [MethodImpl(256)]
         public long PeekLong()
@@ -410,6 +569,11 @@ namespace RapidNetworkLibrary.Serialization
             return value;
         }
 
+
+        /// <summary>
+        /// Adds a ulong to the buffer advancing the position 8 bytes.
+        /// </summary>
+        /// <param name="value">the value added to the buffer.</param>
         [MethodImpl(256)]
         public BitBuffer AddULong(ulong value)
         {
@@ -419,6 +583,10 @@ namespace RapidNetworkLibrary.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Reads a ulong from the buffer advancing the position 8 bytes.
+        /// </summary>
+        /// <returns>The value read from the buffer.</returns>
         [MethodImpl(256)]
         public ulong ReadULong()
         {
@@ -428,6 +596,10 @@ namespace RapidNetworkLibrary.Serialization
             return (ulong)high << 32 | low;
         }
 
+        /// <summary>
+        /// Reads a ULong from the buffer without advancing the position.
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(256)]
         public ulong PeekULong()
         {
@@ -439,66 +611,9 @@ namespace RapidNetworkLibrary.Serialization
             return value;
         }
 
-        [MethodImpl(256)]
-        public BitBuffer AddString(string value)
-        {
-            if (value == null)
-                throw new ArgumentNullException("value");
+       
 
-            uint length = (uint)value.Length;
-
-            if (length > stringLengthMax)
-            {
-                length = stringLengthMax;
-
-                throw new ArgumentOutOfRangeException("value length exceeded");
-            }
-
-            Add(stringLengthBits, length);
-
-            for (int i = 0; i < length; i++)
-            {
-                Add(bitsASCII, ToASCII(value[i]));
-            }
-
-            return this;
-        }
-
-        [MethodImpl(256)]
-        public string ReadString()
-        {
-            StringBuilder builder = new StringBuilder();
-            uint length = Read(stringLengthBits);
-
-            for (int i = 0; i < length; i++)
-            {
-                builder.Append((char)Read(bitsASCII));
-            }
-
-            return builder.ToString();
-        }
-
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
-
-            for (int i = chunks.Length - 1; i >= 0; i--)
-            {
-                builder.Append(Convert.ToString(chunks[i], 2).PadLeft(32, '0'));
-            }
-
-            StringBuilder spaced = new StringBuilder();
-
-            for (int i = 0; i < builder.Length; i++)
-            {
-                spaced.Append(builder[i]);
-
-                if ((i + 1) % 8 == 0)
-                    spaced.Append(" ");
-            }
-
-            return spaced.ToString();
-        }
+       
 
         private void ExpandArray()
         {

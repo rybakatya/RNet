@@ -11,9 +11,9 @@ using System.Diagnostics;
 namespace RapidNetworkLibrary.Connections
 {
     
-    public class ConnectionHandler
+    internal class ConnectionHandler
     {
-       
+      
         private WorkerCollection workers;
         Dictionary<uint, Connection> connections = new Dictionary<uint, Connection>();
 

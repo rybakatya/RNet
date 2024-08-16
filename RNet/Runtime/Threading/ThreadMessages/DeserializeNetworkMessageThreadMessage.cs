@@ -3,7 +3,7 @@
 
 namespace RapidNetworkLibrary.Threading.ThreadMessages
 {
-    public struct DeserializeNetworkMessageThreadMessage
+    internal struct DeserializeNetworkMessageThreadMessage
     {
         public uint sender;
         public NativeString ip;

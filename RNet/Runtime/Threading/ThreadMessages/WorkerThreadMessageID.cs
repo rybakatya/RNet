@@ -1,4 +1,4 @@
-﻿public enum WorkerThreadMessageID
+﻿internal enum WorkerThreadMessageID
 {
     SendConnection,
     SendDisconnection,

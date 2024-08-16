@@ -3,7 +3,7 @@
 
 namespace RapidNetworkLibrary.Threading.ThreadMessages
 {
-    public struct PacketDataThreadMessage
+    internal struct PacketDataThreadMessage
     {
         public uint target;
         public byte channel;

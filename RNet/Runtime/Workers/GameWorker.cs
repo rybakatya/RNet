@@ -8,19 +8,23 @@ using System;
 
 namespace RapidNetworkLibrary.Workers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class GameWorker : Worker
     {
 
-        public Action<Connection> onSocketConnected;
-        public Action<Connection> onSocketDisconnected;
-        public Action<Connection> onSocketTimedout;
+        internal Action<Connection> onSocketConnected;
+        internal Action<Connection> onSocketDisconnected;
+        internal Action<Connection> onSocketTimedout;
 
-        public Action<Connection, ushort, IntPtr> onSocketReceive;
+        internal Action<Connection, ushort, IntPtr> onSocketReceive;
         
 
         private readonly WorkerCollection _workers;
         private readonly ExtensionManager _extensionManager;
         
+        ///
         internal GameWorker(WorkerCollection workers, ExtensionManager extensionManager)
         {
             _workers = workers;
@@ -79,6 +83,10 @@ namespace RapidNetworkLibrary.Workers
         {
             Consume();           
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public override void OnDestroy()
         {
 

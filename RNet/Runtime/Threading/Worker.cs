@@ -7,16 +7,25 @@ using System;
 
 namespace RapidNetworkLibrary.Threading
 {
+    /// <summary>
+    /// Base class for workers, are just classes you can enque events into.
+    /// </summary>
     public abstract class Worker
     {
         internal bool shouldRun;
         internal MPSCQueue<IntPtr> messageQueue = new MPSCQueue<IntPtr>(1024);
         internal abstract void OnConsume(ushort message, IntPtr data);
 
+        /// <summary>
+        /// 
+        /// </summary>
         public abstract void OnDestroy();
 
         
-
+        /// <summary>
+        /// Enqueues a event  into the queue. This is thread safe and can be called from any thread always.
+        /// </summary>
+        /// <param name="threadMessageID">the event id for the event you're passing.</param>
         public void Enqueue(ushort threadMessageID)
         {
             var header = new WorkerThreadHeader()
@@ -29,6 +38,13 @@ namespace RapidNetworkLibrary.Threading
             if (messageQueue.TryEnqueue(messagePointer) == false)
                 Logger.Log(LogLevel.Error, "Failed to enqueue " + threadMessageID.ToString() + " to the mpsc queue");
         }
+
+        /// <summary>
+        /// Enqueues a event  into the queue. This is thread safe and can be called from any thread always.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="threadMessageID">the event id for the event you're passing.</param>
+        /// <param name="data">the event data you're enqueue must be unmanaged</param>
         public void Enqueue<T>(ushort threadMessageID, T data) where T : unmanaged
         {
             var dataPointer = MemoryHelper.Write<T>(data);
@@ -43,6 +59,9 @@ namespace RapidNetworkLibrary.Threading
                 Logger.Log(LogLevel.Error, "Failed to enqueue " + threadMessageID.ToString() + " to the mpsc queue");
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
         public unsafe void Consume()
         {
             var ptr = IntPtr.Zero;
@@ -55,6 +74,9 @@ namespace RapidNetworkLibrary.Threading
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Flush()
         {
             

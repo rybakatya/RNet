@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace RapidNetworkLibrary
 {
-    public class IDGenerator
+    internal class IDGenerator
     {
         public List<ushort> ids;
         public IDGenerator(ushort size)
@@ -34,10 +34,7 @@ namespace RapidNetworkLibrary
         }
 
 
-        /// <summary>
-        /// This is slow on large pools of ids.
-        /// </summary>
-        /// <param name="id"></param>
+        
         public void Take(ushort id)
         {
             ids.Remove(id);

@@ -18,7 +18,9 @@ using RapidNetworkLibrary.Extensions;
 
 namespace RapidNetworkLibrary.Workers
 {
-
+    /// <summary>
+    /// Used internally by RNet to manage the  logic thread.
+    /// </summary>
     public class LogicWorkerThread : WorkerThread
     {
 
@@ -88,7 +90,9 @@ namespace RapidNetworkLibrary.Workers
 
         internal ConnectionHandler connectionHandler;
         
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Init()
         {
             shouldRun = true;
@@ -108,7 +112,9 @@ namespace RapidNetworkLibrary.Workers
 
        
         
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Tick()
         {
 
@@ -237,7 +243,9 @@ namespace RapidNetworkLibrary.Workers
             Marshal.FreeHGlobal(packet.Data);
             
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Destroy()
         {
             workers = null;

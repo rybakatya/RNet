@@ -4,7 +4,7 @@ using RapidNetworkLibrary.Connections;
 
 namespace RapidNetworkLibrary.Threading.ThreadMessages
 {
-    public struct NetworkMessageDataThreadMessage
+    internal struct NetworkMessageDataThreadMessage
     {
         public ushort messageID;
         public IntPtr messageData;

@@ -12,6 +12,9 @@ using RapidNetworkLibrary.Extensions;
 
 namespace RapidNetworkLibrary.Workers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class SocketWorkerThread : WorkerThread
     {
         private WorkerCollection workers;
@@ -31,6 +34,10 @@ namespace RapidNetworkLibrary.Workers
             _extensionManager = extensionManager;
            
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Init()
         {
             shouldRun = true;
@@ -104,6 +111,10 @@ namespace RapidNetworkLibrary.Workers
             }
             return netEvent;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Tick()
         {
 
@@ -253,7 +264,9 @@ namespace RapidNetworkLibrary.Workers
 
 
 #endif
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Destroy()
         {
             enetHost.Flush();

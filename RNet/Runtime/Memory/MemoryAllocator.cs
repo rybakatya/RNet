@@ -11,13 +11,30 @@ using UnityEditor;
 
 namespace RapidNetworkLibrary.Memory
 {
+
+    /// <summary>
+    /// Can inherit from MemoryAllocator class to create your very own high performance allocator.
+    /// <seealso cref="RNetAllocator"/>
+    /// </summary>
     public abstract class MemoryAllocator
     {
 #if TRACK
         private ConcurrentDictionary<IntPtr, string> allocations = new ConcurrentDictionary<IntPtr, string>(4, 2048);
 #endif
         private static MemoryAllocator alloc;
+
+        /// <summary>
+        /// Allocates native memory of size.
+        /// </summary>
+        /// <param name="size">How large of a slice of memory to allocate.</param>
+        /// <returns>a pointer to the memory allocated.</returns>
         public abstract IntPtr Malloc(int size);
+
+
+        /// <summary>
+        /// Frees native memory.
+        /// </summary>
+        /// <param name="ptr">A pointer to the memory you would like to free.</param>
         public abstract void Free(IntPtr ptr);
 
 #if TRACK

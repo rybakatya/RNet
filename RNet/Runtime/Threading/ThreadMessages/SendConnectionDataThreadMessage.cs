@@ -1,6 +1,6 @@
 ﻿namespace RapidNetworkLibrary.Threading.ThreadMessages
 {
-    public struct SendConnectionDataThreadMessage
+    internal struct SendConnectionDataThreadMessage
     {
         public uint id;
         public NativeString ip;

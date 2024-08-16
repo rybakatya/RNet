@@ -11,6 +11,7 @@
 	  <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	  <OutputPath>$(SolutionDir)\bin\$(MSBuildProjectName)\</OutputPath>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ServerDebug|x64'">
@@ -157,6 +158,13 @@
     <None Remove="Runtime\Zones\ZoneServer\Rect.cs.meta" />
     <None Remove="Runtime\Zones\ZoneServer\ServerSpatialHash.cs.meta" />
     <None Remove="Runtime\Zones\ZoneServer\ZoneServer.cs.meta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vsxmd" Version="1.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

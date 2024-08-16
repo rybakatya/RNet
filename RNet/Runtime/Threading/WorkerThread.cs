@@ -4,17 +4,28 @@ using System.Threading;
 
 namespace RapidNetworkLibrary.Threading
 {
+
+    /// <summary>
+    /// A worker that is invoked on a seperate thread.
+    /// </summary>
     public abstract class WorkerThread : Worker
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected Thread thread;
 
-
+        /// <summary>
+        /// Gets the workers thread id.
+        /// </summary>
+        /// <returns>workers thread id.</returns>
         public int GetThreadID()
         {
             return thread.ManagedThreadId;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public WorkerThread()
         {
             thread = new Thread(DoWork);
@@ -22,7 +33,7 @@ namespace RapidNetworkLibrary.Threading
             shouldRun = true;           
         }
 
-        public int timeout = 0;
+        private int timeout = 0;
         private Stopwatch ticker;
         internal void StartThread(int ticksPerSecond)
         {
@@ -44,9 +55,22 @@ namespace RapidNetworkLibrary.Threading
 
            
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected abstract void Init();
+        /// <summary>
+        /// 
+        /// </summary>
         protected abstract void Tick();
+        /// <summary>
+        /// 
+        /// </summary>
         protected abstract void Destroy();
+        /// <summary>
+        /// 
+        /// </summary>
         public override void OnDestroy()
         {
             shouldRun = false;

@@ -3,7 +3,7 @@
 
 namespace RapidNetworkLibrary
 {
-    public struct RNetIPAddress : IEquatable<RNetIPAddress>
+    internal struct RNetIPAddress : IEquatable<RNetIPAddress>
     {
         public string ip;
         public ushort port;

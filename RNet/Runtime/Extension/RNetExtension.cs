@@ -6,6 +6,8 @@ using System.Collections;
 namespace RapidNetworkLibrary.Extensions
 {
 
+
+    
     /// <summary>
     /// Base class used to implement extensions for RNet.
     /// </summary>
@@ -53,7 +55,8 @@ namespace RapidNetworkLibrary.Extensions
         /// <param name="sender"></param>
         /// <param name="messageID"></param>
         /// <param name="messageData"></param>
-        public abstract void OnSocketReceive(ThreadType threadType, Connection sender, ushort messageID, IntPtr messageData);
+        /// <returns>returns true if you want to prevent this event being called in subsequent threads.</returns>
+        public abstract bool OnSocketReceive(ThreadType threadType, Connection sender, ushort messageID, IntPtr messageData);
 
         /// <summary>
         /// Called by RNet automatically after a thread message was received. This is not related to the network messages in anyway.

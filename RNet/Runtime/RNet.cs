@@ -358,7 +358,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="logicReceiveAction">the method to be invoked on the logic thread.</param>
         /// <param name="gameReceiveAction">the method to be invoked on the game thread.</param>
-        public static void RegisterReceiveEvent(Action<Connection, ushort, IntPtr> logicReceiveAction = null, Action<Connection, ushort, IntPtr> gameReceiveAction = null)
+        public static void RegisterReceiveEvent(OnSocketReceiveDelegate logicReceiveAction = null, Action<Connection, ushort, IntPtr> gameReceiveAction = null)
         {
             if (logicReceiveAction != null)
                 workers.logicWorker.onSocketReceive += logicReceiveAction;
@@ -372,7 +372,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="logicReceiveAction">the logic method to unregister.</param>
         /// <param name="gameReceiveAction">the game method to unregister.</param>
-        public static void UnRegisterReceiveEvent(Action<Connection, ushort, IntPtr> logicReceiveAction, Action<Connection, ushort, IntPtr> gameReceiveAction)
+        public static void UnRegisterReceiveEvent(OnSocketReceiveDelegate logicReceiveAction = null, Action<Connection, ushort, IntPtr> gameReceiveAction = null)
         {
 
             if(logicReceiveAction != null)
@@ -388,7 +388,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="socketConnectLogicAction">the method invoked on the logic thread after a socket connects.</param>
         /// <param name="socketConnectGameAction">the method invoked on the game thread after a socket  connects.</param>
-        public static void RegisterOnSocketConnectEvent(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
+        public static void RegisterOnSocketConnectEvent(OnSocketConnectDelegate socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
         {
             if(socketConnectLogicAction != null)
                 workers.logicWorker.onSocketConnect += socketConnectLogicAction;
@@ -402,7 +402,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="socketConnectLogicAction">the logic method to unregister.</param>
         /// <param name="socketConnectGameAction">the game method to unregister.</param>
-        public static void UnRegisterOnSocketConnectEvent(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)
+        public static void UnRegisterOnSocketConnectEvent(OnSocketConnectDelegate socketConnectLogicAction, Action<Connection> socketConnectGameAction = null)
         {
             if( socketConnectLogicAction != null)
                 workers.logicWorker.onSocketConnect -= socketConnectLogicAction;
@@ -417,7 +417,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="socketDisconnectLogicAction">the method to invoke on the logic thread.</param>
         /// <param name="socketDisconnectGameAction">the method to  invoke on the game thread.</param>
-        public static void RegisterOnSocketDisconnectEvent(Action<Connection> socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)
+        public static void RegisterOnSocketDisconnectEvent(OnSocketDisconnectDelegate socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)
         {
             if (socketDisconnectGameAction != null)
                 workers.gameWorker.onSocketDisconnected += socketDisconnectGameAction;
@@ -431,7 +431,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="socketDisconnectLogicAction">the logic method to unregister</param>
         /// <param name="socketDisconnectGameAction">the game method to unregister</param>
-        public static void UnRegisterOnSocketDisconnectEvent(Action<Connection> socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)
+        public static void UnRegisterOnSocketDisconnectEvent(OnSocketDisconnectDelegate socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)
         {
             if (socketDisconnectGameAction != null)
                 workers.gameWorker.onSocketDisconnected -= socketDisconnectGameAction;
@@ -445,7 +445,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="socketTimeoutLogicAction">the method to invoke on the logic thread.</param>
         /// <param name="socketTimeoutGameAction">the method to  invoke on the game thread.</param>
-        public static void RegisterOnSocketTimeoutEvent(Action<Connection> socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)
+        public static void RegisterOnSocketTimeoutEvent(OnSocketTimeoutDelegate socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)
         {
             if (socketTimeoutLogicAction != null)
                 workers.logicWorker.onSocketTimeout += socketTimeoutLogicAction;
@@ -460,7 +460,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         /// <param name="socketTimeoutLogicAction">the logic method to unregister</param>
         /// <param name="socketTimeoutGameAction">the game method to unregister</param>
-        public static void UnregisterOnSocketTimeoutEvent(Action<Connection> socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)
+        public static void UnregisterOnSocketTimeoutEvent(OnSocketTimeoutDelegate socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)
         {
             if (socketTimeoutLogicAction != null)
                 workers.logicWorker.onSocketTimeout -= socketTimeoutLogicAction;

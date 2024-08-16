@@ -558,7 +558,21 @@ PlayerSettings:
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: CLIENT
+    EmbeddedLinux: CLIENT
+    LinuxHeadlessSimulation: CLIENT
+    Nintendo Switch: CLIENT
+    QNX: CLIENT
+    Server: CLIENT
+    Stadia: CLIENT
+    Standalone: CLIENT
+    VisionOS: CLIENT
+    WebGL: CLIENT
+    Windows Store Apps: CLIENT
+    XboxOne: CLIENT
+    iPhone: CLIENT
+    tvOS: CLIENT
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

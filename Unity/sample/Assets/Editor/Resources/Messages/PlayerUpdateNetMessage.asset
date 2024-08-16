@@ -15,14 +15,12 @@ MonoBehaviour:
   id: 1
   messageName: PlayerUpdateNetMessage
   fields:
-  - fieldName: 
-    fieldType: 0
-    fieldTypeIndex: 0
-  - fieldName: 
-    fieldType: 0
-    fieldTypeIndex: 0
-  - fieldName: 
-    fieldType: 0
-    fieldTypeIndex: 0
+  - fieldName: gold
+    fieldType: 2
+  - fieldName: health
+    fieldType: 1
+  - fieldName: armor
+    fieldType: 1
   editor: {fileID: 0}
   foldedOut: 1
+  generateSerializer: 1

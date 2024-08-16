@@ -49,21 +49,25 @@ namespace RapidNetworkLibrary.Connections
             _extensionManager.OnSocketConnect(ThreadType.Logic, c);
 
             connections.Add(peerID, c);
+
+            bool value = false;
             if (workers.logicWorker.onSocketConnect != null)
-                workers.logicWorker.onSocketConnect(c);
+                value = workers.logicWorker.onSocketConnect(c);
 
 
-            
-            workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnection, c);
+            if(value == false)
+                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnection, c);
         }
 
         internal void HandleDisconnect(uint peer)
         {
             _extensionManager.OnSocketDisconnect(ThreadType.Logic, GetConnection(peer));
+            bool value = false;
             if (workers.logicWorker.onSocketDisconnect != null)
-                workers.logicWorker.onSocketDisconnect(connections[peer]);
+                value = workers.logicWorker.onSocketDisconnect(connections[peer]);
 
-            workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connections[peer]);
+            if(value == false)
+                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connections[peer]);
 
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
@@ -73,10 +77,14 @@ namespace RapidNetworkLibrary.Connections
         internal void HandleTimeout(uint peer)
         {
             _extensionManager.OnSocketTimeout(ThreadType.Logic, GetConnection(peer));
-            if (workers.logicWorker.onSocketTimeout != null)
-                workers.logicWorker.onSocketDisconnect(connections[peer]);
 
-            workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendTimeout, connections[peer]);
+            bool value = false;
+            if (workers.logicWorker.onSocketTimeout != null)
+                value = workers.logicWorker.onSocketDisconnect(connections[peer]);
+
+            if(value == false)
+                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendTimeout, connections[peer]);
+            
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
             Logger.Log(LogLevel.Info, "A socket timed out");

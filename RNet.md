@@ -2379,7 +2379,7 @@ reference to logic worker  thread.
 
 ##### Summary
 
-refrence to network  worker thread.
+refrence to network worker thread.
 
 <a name='T-RapidNetworkLibrary-Threading-WorkerThread'></a>
 ## WorkerThread `type`
@@ -2399,97 +2399,3 @@ A worker that is invoked on a seperate thread.
 
 
 
-##### Parameters
-
-This constructor has no parameters.
-
-<a name='F-RapidNetworkLibrary-Threading-WorkerThread-thread'></a>
-### thread `constants`
-
-##### Summary
-
-
-
-<a name='M-RapidNetworkLibrary-Threading-WorkerThread-Destroy'></a>
-### Destroy() `method`
-
-##### Summary
-
-
-
-##### Parameters
-
-This method has no parameters.
-
-<a name='M-RapidNetworkLibrary-Threading-WorkerThread-GetThreadID'></a>
-### GetThreadID() `method`
-
-##### Summary
-
-Gets the workers thread id.
-
-##### Returns
-
-workers thread id.
-
-##### Parameters
-
-This method has no parameters.
-
-<a name='M-RapidNetworkLibrary-Threading-WorkerThread-Init'></a>
-### Init() `method`
-
-##### Summary
-
-
-
-##### Parameters
-
-This method has no parameters.
-
-<a name='M-RapidNetworkLibrary-Threading-WorkerThread-OnDestroy'></a>
-### OnDestroy() `method`
-
-##### Summary
-
-
-
-##### Parameters
-
-This method has no parameters.
-
-<a name='M-RapidNetworkLibrary-Threading-WorkerThread-Tick'></a>
-### Tick() `method`
-
-##### Summary
-
-
-
-##### Parameters
-
-This method has no parameters.
-
-<a name='T-RapidNetworkLibrary-Threading-WorkerThreadHeader'></a>
-## WorkerThreadHeader `type`
-
-##### Namespace
-
-RapidNetworkLibrary.Threading
-
-##### Summary
-
-Structure used to wrap thread messages into unmanaged blittable data.
-
-<a name='F-RapidNetworkLibrary-Threading-WorkerThreadHeader-data'></a>
-### data `constants`
-
-##### Summary
-
-a pointer to unmanaged data to pass to the other thread.
-
-<a name='F-RapidNetworkLibrary-Threading-WorkerThreadHeader-messageID'></a>
-### messageID `constants`
-
-##### Summary
-
-the  thread message ID

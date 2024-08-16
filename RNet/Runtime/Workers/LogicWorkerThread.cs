@@ -8,19 +8,46 @@ using RapidNetworkLibrary.Logging;
 using System.Reflection;
 using RapidNetworkLibrary.Serialization;
 using RapidNetworkLibrary.Threading.ThreadMessages;
-
-
 using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
 using RapidNetworkLibrary.Memory;
 using System.Diagnostics;
-using System.Numerics;
+
 using RapidNetworkLibrary.Extensions;
 
 namespace RapidNetworkLibrary.Workers
 {
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="connection"></param>
+    /// <returns></returns>
+    public delegate bool OnSocketConnectDelegate(Connection connection);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="connection"></param>
+    /// <returns></returns>
+    public delegate bool OnSocketDisconnectDelegate(Connection connection);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="connection"></param>
+    /// <returns></returns>
+    public delegate bool OnSocketTimeoutDelegate(Connection connection);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="connection"></param>
+    /// <param name="messageID"></param>
+    /// <param name="messageData"></param>
+    /// <returns></returns>
+    public delegate bool OnSocketReceiveDelegate(Connection connection, ushort messageID, IntPtr messageData);
+
     /// <summary>
     /// Used internally by RNet to manage the  logic thread.
     /// </summary>
+    /// 
     public class LogicWorkerThread : WorkerThread
     {
 
@@ -31,13 +58,13 @@ namespace RapidNetworkLibrary.Workers
         /// </summary>
         private Action onLogicInit;
 
-        internal Action<Connection, ushort, IntPtr> onSocketReceive;
+        internal OnSocketReceiveDelegate onSocketReceive;
 
-        internal Action<Connection> onSocketConnect;
-        
-        internal Action<Connection> onSocketDisconnect;
+        internal OnSocketConnectDelegate onSocketConnect; 
+      
+        internal OnSocketDisconnectDelegate onSocketDisconnect;
 
-        internal Action<Connection> onSocketTimeout;
+        internal OnSocketTimeoutDelegate onSocketTimeout;
 
 
 
@@ -190,12 +217,16 @@ namespace RapidNetworkLibrary.Workers
                     messageData = ptr,
                     sender = connectionHandler.GetConnection(data.sender)
                 };
+                bool value = _extensionManager.OnSocketReceive(ThreadType.Logic, connectionHandler.GetConnection(data.sender), msgID, ptr);
 
-                _extensionManager.OnSocketReceive(ThreadType.Logic, connectionHandler.GetConnection(data.sender), msgID, ptr);
-                if(onSocketReceive != null)
-                    onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
+                if (value == false)
+                {
+                    if (onSocketReceive != null)
+                        value = onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
 
-                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread, msgData);
+                    if (value == false)
+                        workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread, msgData);
+                }
             }
 
             

@@ -44,12 +44,16 @@ namespace RapidNetworkLibrary.Extensions
             }
         }
 
-        public void OnSocketReceive(ThreadType threadType, Connection connection, ushort messageID, IntPtr messageData)
+        public bool OnSocketReceive(ThreadType threadType, Connection connection, ushort messageID, IntPtr messageData)
         {
             foreach( var ext in _extensions)
             {
-                ext.OnSocketReceive(threadType, connection, messageID, messageData);
+                if(ext.OnSocketReceive(threadType, connection, messageID, messageData) == true)
+                {
+                    return true;
+                }
             }
+            return false;
         }
 
         public void OnThreadMessageReceived(ThreadType threadType, ushort id, IntPtr messageData)

@@ -263,10 +263,35 @@ Navigate to  ```RNet/SwitchTarget/Client``` and set the target to client again. 
 ```
 
 # API
-#### BitBuffer
-A class used to serialize data to bits to be sent over the network.
+## BitBuffer
+Class used to write values to a buffer that can be converted to a span of bytes to send over the network.
 
-```BitBuffer.BitBuffer(int capacity=defaultCapacity)``` creates a new instance of the BitBuffer class with a set capacity. Capacity is multiplied by four during serialization. For example ```new BitBuffer(375);``` creates a BitBuffer that can hold 1500 bytes of data.
+<a name='M-RapidNetworkLibrary-Serialization-BitBuffer-#ctor-System-Int32-'></a>
+### BitBuffer(numberOfBuckets) `constructor`
+
+##### Summary
+
+creates a new instance of the BitBuffer class with a set capacity. Capacity is multiplied by four during serialization. For example ```new BitBuffer(375);``` creates a BitBuffer that can hold 1500 bytes of data.
+
+##### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| numberOfBuckets | [System.Int32](http://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=EN-US&k=k:System.Int32 'System.Int32') | Number of buffer buckets |
+
+
+<a name='M-RapidNetworkLibrary-Serialization-BitBuffer-AddBool-System-Boolean-'></a>
+### AddBool(value) 
+
+##### Summary
+
+Adds a bool to the buffer advancing the position by one byte.
+
+##### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| value | [System.Boolean](http://msdn.microsoft.com/query/dev14.query?appId=Dev14IDEF1&l=EN-US&k=k:System.Boolean 'System.Boolean') | value to add to the buffer |
 
 ```BitBuffer.AddBool(bool value)``` writes a bool to the end of the buffer advancing its position by 1 byte.
 

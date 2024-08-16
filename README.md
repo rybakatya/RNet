@@ -12,6 +12,33 @@ RNet is an engine agnostic lock free multithreaded reliable udp library designed
 * Server/Client code stripping. No server code will be included with client builds.
 
 
+# Starting a server
+```csharp
+RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+```
+
+# Starting a client and connecting to a server
+
+```csharp
+RNet.InitializeClient(255);
+RNet.Connect("127.0.0.1", 7777);
+```
+
+# Sending a message
+
+```csharp
+public struct TestMessageData : IMessageObject
+{
+    public int someInt;
+    public float someFloat;
+}
+RNet.SendReliable(connection, NetworkMessageIDS.SendTestMessage, testMessageChannel, new TestMessageData()
+{
+    someInt = 342325,
+    someFloat = 3423.343f
+});
+```
+
 # Getting Started With Unity
 First install the needed packages to run RNet. In the unity editor go to ```Window/Package Manager``` then click "add package from git url" in the drop down.\
 \

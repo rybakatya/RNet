@@ -4,9 +4,9 @@ using ENet;
 using Unity.Collections.LowLevel.Unsafe;
 #endif
 
-namespace RapidNetworkLibrary.Runtime.Threading.ThreadMessages
+namespace RapidNetworkLibrary.Threading.ThreadEvents
 {
-    internal struct SerializeNetworkMessageThreadMessage
+    internal struct SerializeNetworkMessageThreadEvent
     {
         public uint target;
         public ushort id;

@@ -1,7 +1,7 @@
 ﻿using LocklessQueue.Queues;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
-using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
+using RapidNetworkLibrary.Threading.ThreadEvents;
 using System;
 
 
@@ -13,8 +13,8 @@ namespace RapidNetworkLibrary.Threading
     public abstract class Worker
     {
         internal bool shouldRun;
-        internal MPSCQueue<IntPtr> messageQueue = new MPSCQueue<IntPtr>(1024);
-        internal abstract void OnConsume(ushort message, IntPtr data);
+        internal MPSCQueue<IntPtr> eventQueue = new MPSCQueue<IntPtr>(1024);
+        internal abstract void OnConsume(ushort eventID, IntPtr data);
 
         /// <summary>
         /// 
@@ -25,38 +25,38 @@ namespace RapidNetworkLibrary.Threading
         /// <summary>
         /// Enqueues a event  into the queue. This is thread safe and can be called from any thread always.
         /// </summary>
-        /// <param name="threadMessageID">the event id for the event you're passing.</param>
-        public void Enqueue(ushort threadMessageID)
+        /// <param name="threadEventID">the event id for the event you're passing.</param>
+        public void Enqueue(ushort threadEventID)
         {
-            var header = new WorkerThreadHeader()
+            var header = new WorkerThreadEventHeader()
             {
-                messageID = threadMessageID,
+                eventID = threadEventID,
                 data = IntPtr.Zero
             };
 
-            var messagePointer = MemoryHelper.Write(header);
-            if (messageQueue.TryEnqueue(messagePointer) == false)
-                Logger.Log(LogLevel.Error, "Failed to enqueue " + threadMessageID.ToString() + " to the mpsc queue");
+            var eventPointer = MemoryHelper.Write(header);
+            if (eventQueue.TryEnqueue(eventPointer) == false)
+                Logger.Log(LogLevel.Error, "Failed to enqueue " + threadEventID.ToString() + " to the mpsc queue");
         }
 
         /// <summary>
         /// Enqueues a event  into the queue. This is thread safe and can be called from any thread always.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="threadMessageID">the event id for the event you're passing.</param>
+        /// <param name="threadEventID">the event id for the event you're passing.</param>
         /// <param name="data">the event data you're enqueue must be unmanaged</param>
-        public void Enqueue<T>(ushort threadMessageID, T data) where T : unmanaged
+        public void Enqueue<T>(ushort threadEventID, T data) where T : unmanaged
         {
             var dataPointer = MemoryHelper.Write<T>(data);
-            var header = new WorkerThreadHeader()
+            var header = new WorkerThreadEventHeader()
             {
-                messageID = threadMessageID,
+                eventID = threadEventID,
                 data = dataPointer
             };
 
-            var messagePointer = MemoryHelper.Write(header);
-            if (messageQueue.TryEnqueue(messagePointer) == false)
-                Logger.Log(LogLevel.Error, "Failed to enqueue " + threadMessageID.ToString() + " to the mpsc queue");
+            var eventPointer = MemoryHelper.Write(header);
+            if (eventQueue.TryEnqueue(eventPointer) == false)
+                Logger.Log(LogLevel.Error, "Failed to enqueue " + threadEventID.ToString() + " to the mpsc queue");
         }
         
         /// <summary>
@@ -65,10 +65,10 @@ namespace RapidNetworkLibrary.Threading
         public unsafe void Consume()
         {
             var ptr = IntPtr.Zero;
-            while (messageQueue.TryDequeue(out ptr) == true && shouldRun == true)
+            while (eventQueue.TryDequeue(out ptr) == true && shouldRun == true)
             {
-                var header = MemoryHelper.Read<WorkerThreadHeader>(ptr);
-                OnConsume(header.messageID, header.data);
+                var header = MemoryHelper.Read<WorkerThreadEventHeader>(ptr);
+                OnConsume(header.eventID, header.data);
                 MemoryHelper.Free(header.data);
                 MemoryHelper.Free(ptr);
             }
@@ -82,12 +82,12 @@ namespace RapidNetworkLibrary.Threading
             
             
             var ptr = IntPtr.Zero;
-            while (messageQueue.TryDequeue(out ptr) == true)
+            while (eventQueue.TryDequeue(out ptr) == true)
             {
-                var header = MemoryHelper.Read<WorkerThreadHeader>(ptr);
-                if(header.messageID == (ushort)WorkerThreadMessageID.SendSerializeMessage)
+                var header = MemoryHelper.Read<WorkerThreadEventHeader>(ptr);
+                if(header.eventID == (ushort)WorkerThreadEventID.SendSerializeMessageEvent)
                 {
-                    var data = MemoryHelper.Read<SerializeNetworkMessageThreadMessage>(header.data);
+                    var data = MemoryHelper.Read<SerializeNetworkMessageThreadEvent>(header.data);
                     MemoryHelper.Free(data.messageObjectPointer);
                 }
                 MemoryHelper.Free(header.data);

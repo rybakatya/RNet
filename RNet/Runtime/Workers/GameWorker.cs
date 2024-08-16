@@ -3,7 +3,7 @@ using RapidNetworkLibrary.Extensions;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
 using RapidNetworkLibrary.Threading;
-using RapidNetworkLibrary.Threading.ThreadMessages;
+using RapidNetworkLibrary.Threading.ThreadEvents;
 using System;
 
 namespace RapidNetworkLibrary.Workers
@@ -31,12 +31,12 @@ namespace RapidNetworkLibrary.Workers
             _extensionManager = extensionManager;
         }
 
-        internal override void OnConsume(ushort message, IntPtr data)
+        internal override void OnConsume(ushort eventID, IntPtr data)
         {
             
-            switch (message)
+            switch (eventID)
             {
-                case (ushort)WorkerThreadMessageID.SendConnection:
+                case (ushort)WorkerThreadEventID.SendConnection:
                     var connection = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketConnect(ThreadType.Game,connection);
                     
@@ -44,7 +44,7 @@ namespace RapidNetworkLibrary.Workers
                         onSocketConnected(connection);                  
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendDisconnection:
+                case (ushort)WorkerThreadEventID.SendDisconnection:
                     var con = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketDisconnect(ThreadType.Game,con);
                     if(onSocketDisconnected != null) 
@@ -52,15 +52,15 @@ namespace RapidNetworkLibrary.Workers
                     break;
 
 
-                case (ushort)WorkerThreadMessageID.SendTimeout:
+                case (ushort)WorkerThreadEventID.SendTimeout:
                     var c = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketTimeout(ThreadType.Game, c);
                     if(onSocketTimedout != null)
                         onSocketTimedout(c);
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread:
-                    var msgData = MemoryHelper.Read<NetworkMessageDataThreadMessage>(data);
+                case (ushort)WorkerThreadEventID.SendNetworkMessageToGameThread:
+                    var msgData = MemoryHelper.Read<NetworkMessageDataThreadEvent>(data);
                     Logging.Logger.Log(LogLevel.Info, "Received message id " + msgData.messageID.ToString());
                     
 
@@ -71,7 +71,7 @@ namespace RapidNetworkLibrary.Workers
                     break;
 
                 default:
-                    _extensionManager.OnThreadMessageReceived(ThreadType.Game, message, data);
+                    _extensionManager.OnThreadEventReceived(ThreadType.Game, eventID, data);
                     break;
 
 

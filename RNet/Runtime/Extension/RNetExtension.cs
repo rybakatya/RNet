@@ -59,11 +59,11 @@ namespace RapidNetworkLibrary.Extensions
         public abstract bool OnSocketReceive(ThreadType threadType, Connection sender, ushort messageID, IntPtr messageData);
 
         /// <summary>
-        /// Called by RNet automatically after a thread message was received. This is not related to the network messages in anyway.
+        /// Called by RNet automatically after a thread event was received. 
         /// </summary>
         /// <param name="threadType"></param>
         /// <param name="id"></param>
-        /// <param name="messageData"></param>
-        public abstract void OnThreadMessageReceived(ThreadType threadType, ushort id, IntPtr messageData);
+        /// <param name="eventData"></param>
+        public abstract void OnThreadEventReceived(ThreadType threadType, ushort id, IntPtr eventData);
     }
 }

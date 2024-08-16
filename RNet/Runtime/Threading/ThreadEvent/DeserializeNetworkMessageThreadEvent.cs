@@ -1,9 +1,9 @@
 ﻿using ENet;
 
 
-namespace RapidNetworkLibrary.Threading.ThreadMessages
+namespace RapidNetworkLibrary.Threading.ThreadEvents
 {
-    internal struct DeserializeNetworkMessageThreadMessage
+    internal struct DeserializeNetworkMessageThreadEvent
     {
         public uint sender;
         public NativeString ip;

@@ -7,8 +7,7 @@ using System.Collections.Generic;
 using RapidNetworkLibrary.Logging;
 using System.Reflection;
 using RapidNetworkLibrary.Serialization;
-using RapidNetworkLibrary.Threading.ThreadMessages;
-using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
+using RapidNetworkLibrary.Threading.ThreadEvents;
 using RapidNetworkLibrary.Memory;
 using System.Diagnostics;
 
@@ -148,39 +147,39 @@ namespace RapidNetworkLibrary.Workers
         }
 
 
-        internal override void OnConsume(ushort messageID, IntPtr data)
+        internal override void OnConsume(ushort eventID, IntPtr data)
         {
 
-            switch (messageID)
+            switch (eventID)
             {
-                case (ushort)WorkerThreadMessageID.SendConnection:
-                    var msgData = MemoryHelper.Read<SendConnectionDataThreadMessage>(data);
+                case (ushort)WorkerThreadEventID.SendConnection:
+                    var msgData = MemoryHelper.Read<SendConnectionDataThreadEvent>(data);
                     connectionHandler.HandleSocketConnection(msgData.id,msgData.ip, msgData.port);
 
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendDisconnection:
+                case (ushort)WorkerThreadEventID.SendDisconnection:
                     connectionHandler.HandleDisconnect(MemoryHelper.Read<uint>(data));
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendTimeout:
+                case (ushort)WorkerThreadEventID.SendTimeout:
                     connectionHandler.HandleTimeout(MemoryHelper.Read<uint>(data));
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendSerializeMessage:
+                case (ushort)WorkerThreadEventID.SendSerializeMessageEvent:
                     
 
-                    var msg = MemoryHelper.Read<SerializeNetworkMessageThreadMessage>(data);
+                    var msg = MemoryHelper.Read<SerializeNetworkMessageThreadEvent>(data);
                     //SendMessage(msg.target, msg.id, msg.channel, msg.flags, msg.messageObjectPointer);
                     SerializeOutgoingMessage(msg);
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendDeserializeNetworkMessage:
-                    DeserializeIncomingMessage(MemoryHelper.Read<DeserializeNetworkMessageThreadMessage>(data));
+                case (ushort)WorkerThreadEventID.SendDeserializeNetworkMessage:
+                    DeserializeIncomingMessage(MemoryHelper.Read<DeserializeNetworkMessageThreadEvent>(data));
                     break;
 
                 default:
-                    _extensionManager.OnThreadMessageReceived(ThreadType.Logic, messageID, data);
+                    _extensionManager.OnThreadEventReceived(ThreadType.Logic, eventID, data);
                     break;
 
 
@@ -192,7 +191,7 @@ namespace RapidNetworkLibrary.Workers
 
        
 
-        private unsafe void DeserializeIncomingMessage(DeserializeNetworkMessageThreadMessage data)
+        private unsafe void DeserializeIncomingMessage(DeserializeNetworkMessageThreadEvent data)
         {
             connectionHandler.SetConnection(data.sender, Connection.Create(data.sender, new NativeString(data.ip.ToString()), data.port, data.bytesSent, data.bytesReceived, data.lastReceiveTime, data.lastSendTime, data.lastRoundTripTime, data.mtu, data.packetsSent, data.packetsLost));
             var buffer = BufferPool.GetBitBuffer();
@@ -211,7 +210,7 @@ namespace RapidNetworkLibrary.Workers
             else
             {
                 var ptr = serializers[msgID].Deserialize(buffer);
-                var msgData = new NetworkMessageDataThreadMessage()
+                var msgData = new NetworkMessageDataThreadEvent()
                 {
                     messageID = msgID,
                     messageData = ptr,
@@ -225,7 +224,7 @@ namespace RapidNetworkLibrary.Workers
                         value = onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
 
                     if (value == false)
-                        workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendNetworkMessageToGameThread, msgData);
+                        workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendNetworkMessageToGameThread, msgData);
                 }
             }
 
@@ -241,7 +240,7 @@ namespace RapidNetworkLibrary.Workers
         
 
         
-        private unsafe void SerializeOutgoingMessage(SerializeNetworkMessageThreadMessage data)
+        private unsafe void SerializeOutgoingMessage(SerializeNetworkMessageThreadEvent data)
         {
 
 
@@ -257,7 +256,7 @@ namespace RapidNetworkLibrary.Workers
             Packet packet = default(Packet);
             packet.Create(ptr, buffer.Length, data.flags);
             packet.SetFreeCallback(packetFree);
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendSerializeMessage, new PacketDataThreadMessage()
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendSerializeMessageEvent, new PackDataThreadEvent()
             {
                 target = data.target,
                 channel = data.channel,

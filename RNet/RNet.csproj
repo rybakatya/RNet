@@ -114,6 +114,14 @@
     <None Remove="Runtime\Threading\Lockless-Queue\View.meta" />
     <None Remove="Runtime\Threading\Lockless-Queue\View\ICollectionDebugView.cs.meta" />
     <None Remove="Runtime\Threading\Lockless-Queue\View\IProducerConsumerCollectionDebugView.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\ConnectToSocketThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\DeserializeNetworkMessageThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\InitializeServer.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\NetworkMessageDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\PacketDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\SendConnectionDataThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\SerializeNetworkMessageThreadMessage.cs.meta" />
+    <None Remove="Runtime\Threading\ThreadEvent\WorkerThreadMessageID.cs.meta" />
     <None Remove="Runtime\Threading\ThreadMessages.meta" />
     <None Remove="Runtime\Threading\ThreadMessages\ConnectToSocketThreadMessage.cs.meta" />
     <None Remove="Runtime\Threading\ThreadMessages\DeserializeNetworkMessageThreadMessage.cs.meta" />

@@ -56,11 +56,11 @@ namespace RapidNetworkLibrary.Extensions
             return false;
         }
 
-        public void OnThreadMessageReceived(ThreadType threadType, ushort id, IntPtr messageData)
+        public void OnThreadEventReceived(ThreadType threadType, ushort id, IntPtr eventData)
         {
             foreach(var ext in _extensions)
             {
-                ext.OnThreadMessageReceived(threadType, id, messageData);
+                ext.OnThreadEventReceived(threadType, id, eventData);
             }
         }
     }

@@ -56,7 +56,7 @@ namespace RapidNetworkLibrary.Connections
 
 
             if(value == false)
-                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnection, c);
+                workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendConnection, c);
         }
 
         internal void HandleDisconnect(uint peer)
@@ -67,7 +67,7 @@ namespace RapidNetworkLibrary.Connections
                 value = workers.logicWorker.onSocketDisconnect(connections[peer]);
 
             if(value == false)
-                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connections[peer]);
+                workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendDisconnection, connections[peer]);
 
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
@@ -83,7 +83,7 @@ namespace RapidNetworkLibrary.Connections
                 value = workers.logicWorker.onSocketDisconnect(connections[peer]);
 
             if(value == false)
-                workers.gameWorker.Enqueue((ushort)WorkerThreadMessageID.SendTimeout, connections[peer]);
+                workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendTimeout, connections[peer]);
             
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);

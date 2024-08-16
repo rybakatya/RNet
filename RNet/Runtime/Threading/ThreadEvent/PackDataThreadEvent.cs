@@ -1,9 +1,9 @@
 ﻿using ENet;
 
 
-namespace RapidNetworkLibrary.Threading.ThreadMessages
+namespace RapidNetworkLibrary.Threading.ThreadEvents
 {
-    internal struct PacketDataThreadMessage
+    internal struct PackDataThreadEvent
     {
         public uint target;
         public byte channel;

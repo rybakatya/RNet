@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RapidNetworkLibrary.Threading;
-using RapidNetworkLibrary.Threading.ThreadMessages;
+using RapidNetworkLibrary.Threading.ThreadEvents;
 using RapidNetworkLibrary.Logging;
 using System.Collections.Generic;
 using RapidNetworkLibrary.Memory;
@@ -125,7 +125,7 @@ namespace RapidNetworkLibrary.Workers
 
                 case EventType.Connect:
                     peers.Add(e.Peer.ID, e.Peer);
-                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnection, new SendConnectionDataThreadMessage()
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendConnection, new SendConnectionDataThreadEvent()
                     {
                         id = e.Peer.ID,
                         ip = new NativeString(e.Peer.IP),
@@ -135,17 +135,17 @@ namespace RapidNetworkLibrary.Workers
 
                 case EventType.Disconnect:
                     peers.Remove(e.Peer.ID);
-                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, e.Peer.ID);
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendDisconnection, e.Peer.ID);
                     break;
 
                 case EventType.Timeout:
                     peers.Remove(e.Peer.ID);
-                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendTimeout, e.Peer.ID);
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendTimeout, e.Peer.ID);
                     break;
 
                 case EventType.Receive:
                     Logger.Log(LogLevel.Info, "Packet received on network thread, sending to logic thread for deserialization.");
-                    workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendDeserializeNetworkMessage, new DeserializeNetworkMessageThreadMessage()
+                    workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendDeserializeNetworkMessage, new DeserializeNetworkMessageThreadEvent()
                     {
                         packet = e.Packet,
                         sender = e.Peer.ID,
@@ -179,18 +179,18 @@ namespace RapidNetworkLibrary.Workers
 
         
 
-        internal override void OnConsume(ushort messageID, IntPtr data)
+        internal override void OnConsume(ushort eventID, IntPtr data)
         {
 
-            switch (messageID)
+            switch (eventID)
             {
              
 #if SERVER
-                case (ushort)WorkerThreadMessageID.SendInitializeServer:
+                case (ushort)WorkerThreadEventID.SendInitializeServer:
                     InitServer(data);
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendDisconnection:
+                case (ushort)WorkerThreadEventID.SendDisconnection:
                     var peerID = MemoryHelper.Read<uint> (data);
                     if (peers.ContainsKey(peerID) == true)
                     {
@@ -198,11 +198,11 @@ namespace RapidNetworkLibrary.Workers
                     }
                     break;
 #endif
-                case (ushort)WorkerThreadMessageID.SendConnectToSocket:
+                case (ushort)WorkerThreadEventID.SendConnectToSocket:
                     ConnectToSocket(data);
                     break;
 
-                case (ushort)WorkerThreadMessageID.SendDisconnectionFromPeers:
+                case (ushort)WorkerThreadEventID.SendDisconnectionFromPeers:
                     me.DisconnectNow(0);
                     break;
 
@@ -211,8 +211,8 @@ namespace RapidNetworkLibrary.Workers
                     InitializeENetClient(MemoryHelper.Read<byte>(data));
                     break;
 #endif
-                case (ushort)WorkerThreadMessageID.SendSerializeMessage:
-                    var packetData = MemoryHelper.Read<PacketDataThreadMessage>(data);
+                case (ushort)WorkerThreadEventID.SendSerializeMessageEvent:
+                    var packetData = MemoryHelper.Read<PackDataThreadEvent>(data);
                     if(peers.ContainsKey(packetData.target) == true)
                     {
                         peers[packetData.target].Send(packetData.channel, ref packetData.payload);
@@ -232,7 +232,7 @@ namespace RapidNetworkLibrary.Workers
                     break;
 
                 default:
-                    _extensionManager.OnThreadMessageReceived(ThreadType.Network, messageID, data);
+                    _extensionManager.OnThreadEventReceived(ThreadType.Network, eventID, data);
                     break;
 
             }
@@ -242,7 +242,7 @@ namespace RapidNetworkLibrary.Workers
         Peer me;
         private void ConnectToSocket(IntPtr data)
         {
-            var dataValue = MemoryHelper.Read<ConnectToSocketThreadMessage>(data);
+            var dataValue = MemoryHelper.Read<ConnectToSocketThreadEvent>(data);
             Logger.Log(LogLevel.Info, "Attempting to connect to " + dataValue.ip.ToString() + ":" + dataValue.port);
             var address = new Address();
             address.SetIP(dataValue.ip.ToString());
@@ -256,7 +256,7 @@ namespace RapidNetworkLibrary.Workers
 #if SERVER
         private void InitServer(IntPtr data)
         {
-            var initData = MemoryHelper.Read<InitializeServer>(data);
+            var initData = MemoryHelper.Read<InitializeServerThreadEvent>(data);
 
             InitializeENetServer(initData.ip.ToString(), initData.port, initData.maxConnections, initData.maxChannels);
             initData.ip.Free();

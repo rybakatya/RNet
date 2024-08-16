@@ -4,12 +4,12 @@ namespace RapidNetworkLibrary.Threading
     /// <summary>
     /// Structure used to wrap thread messages into unmanaged blittable data.
     /// </summary>
-    public struct WorkerThreadHeader
+    public struct WorkerThreadEventHeader
     {
         /// <summary>
-        /// the  thread message ID
+        /// the  thread event ID
         /// </summary>
-        public ushort messageID;
+        public ushort eventID;
 
         /// <summary>
         /// a pointer to unmanaged data to pass to the other thread.

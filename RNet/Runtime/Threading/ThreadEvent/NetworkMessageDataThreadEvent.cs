@@ -2,9 +2,9 @@
 using RapidNetworkLibrary.Connections;
 
 
-namespace RapidNetworkLibrary.Threading.ThreadMessages
+namespace RapidNetworkLibrary.Threading.ThreadEvents
 {
-    internal struct NetworkMessageDataThreadMessage
+    internal struct NetworkMessageDataThreadEvent
     {
         public ushort messageID;
         public IntPtr messageData;

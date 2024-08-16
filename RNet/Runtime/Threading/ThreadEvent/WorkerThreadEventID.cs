@@ -1,4 +1,4 @@
-﻿internal enum WorkerThreadMessageID
+﻿internal enum WorkerThreadEventID
 {
     SendConnection,
     SendDisconnection,
@@ -10,5 +10,5 @@
     SendNetworkMessageToGameThread,
     SendPeerData,
     SendDisconnectionFromPeers,
-    SendSerializeMessage
+    SendSerializeMessageEvent
 }

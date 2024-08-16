@@ -4,8 +4,7 @@ using RapidNetworkLibrary.Connections;
 using RapidNetworkLibrary.Extensions;
 using RapidNetworkLibrary.Logging;
 using RapidNetworkLibrary.Memory;
-using RapidNetworkLibrary.Runtime.Threading.ThreadMessages;
-using RapidNetworkLibrary.Threading.ThreadMessages;
+using RapidNetworkLibrary.Threading.ThreadEvents;
 using RapidNetworkLibrary.Workers;
 
 
@@ -184,18 +183,18 @@ namespace RapidNetworkLibrary
         public static void InitializeServer(string ip, ushort port, byte maxChannels, ushort maxConnections)
         {
 
-            var serverInit = new InitializeServer();
+            var serverInit = new InitializeServerThreadEvent();
             serverInit.ip = new NativeString(ip);
             serverInit.port = port;
             serverInit.maxChannels = maxChannels;
             serverInit.maxConnections = maxConnections;
 
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendInitializeServer, serverInit);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendInitializeServer, serverInit);
         }
 
         internal static void Disconnect(uint connection)
         {
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connection);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendDisconnection, connection);
         }
 
 
@@ -205,7 +204,7 @@ namespace RapidNetworkLibrary
         /// <param name="connection"></param>
         public static void Disconnect(Connection connection)
         {
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnection, connection.ID);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendDisconnection, connection.ID);
         }
 #elif CLIENT
         public static void InitializeClient(byte maxChannels)
@@ -219,7 +218,7 @@ namespace RapidNetworkLibrary
         /// </summary>
         public static void Disconnect()
         {
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendDisconnectionFromPeers);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendDisconnectionFromPeers);
         }
 
 
@@ -231,12 +230,12 @@ namespace RapidNetworkLibrary
         public static void Connect(string ip, ushort port)
         {
             var address = new NativeString(ip);
-            var connectMessage = new ConnectToSocketThreadMessage()
+            var connectMessage = new ConnectToSocketThreadEvent()
             {
                 ip = address,
                 port = port
             };
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendConnectToSocket, connectMessage);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendConnectToSocket, connectMessage);
 
         }
 
@@ -246,7 +245,7 @@ namespace RapidNetworkLibrary
             var ptr = MemoryHelper.Write(message);
 
             
-            var msg = new SerializeNetworkMessageThreadMessage()
+            var msg = new SerializeNetworkMessageThreadEvent()
             {
                 target = target,
                 id = messageID,
@@ -255,7 +254,7 @@ namespace RapidNetworkLibrary
                 flags = flags | PacketFlags.NoAllocate
             };
 
-            workers.logicWorker.Enqueue((ushort)WorkerThreadMessageID.SendSerializeMessage, msg);
+            workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendSerializeMessageEvent, msg);
         }
         
         /// <summary>

@@ -1,6 +1,6 @@
-﻿namespace RapidNetworkLibrary.Threading.ThreadMessages
+﻿namespace RapidNetworkLibrary.Threading.ThreadEvents
 {
-    internal struct InitializeServer
+    internal struct InitializeServerThreadEvent
     {
         public NativeString ip;
         public ushort port;

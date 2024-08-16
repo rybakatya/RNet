@@ -1,16 +1,46 @@
 # RNet
 
+![image](https://github.com/user-attachments/assets/56141c60-5bcb-4367-b538-3721abe2911b)
+
+
 RNet is an engine agnostic lock free multithreaded reliable udp library designed for games. RNet uses native C sockets internally for minmized latency, zig zag encoding and float quantization for low bandwidth usage. RNet is blazing fast and makes uses of native memory to ensure no gc preassure from the library at all. RNet is easily extendable and made with simplicity in mind. 
 
 # Features
 * Connection Managment
 * Server to server communication
 * Clients can connect to multiple servers
-* Blazing fast serialization
+* Blazing fast abstract data serialization
 * Custom extensions to easily add features
 * Lock free thread to thread communication
 * Server/Client code stripping. No server code will be included with client builds.
 
+
+# Starting a server
+```csharp
+RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+```
+
+# Starting a client and connecting to a server
+
+```csharp
+RNet.InitializeClient(255);
+RNet.Connect("127.0.0.1", 7777);
+```
+
+# Sending a message
+
+```csharp
+public struct TestMessageData : IMessageObject
+{
+    public int someInt;
+    public float someFloat;
+}
+RNet.SendReliable(connection, NetworkMessageIDS.SendTestMessage, testMessageChannel, new TestMessageData()
+{
+    someInt = 342325,
+    someFloat = 3423.343f
+});
+```
 
 # Getting Started With Unity
 First install the needed packages to run RNet. In the unity editor go to ```Window/Package Manager``` then click "add package from git url" in the drop down.\
@@ -264,25 +294,65 @@ Navigate to  ```RNet/SwitchTarget/Client``` and set the target to client again. 
 
 # API
 #### BitBuffer
-A class used to serialize data to bits to be sent over the network.
+Class used to write values to a buffer that can be converted to a span of bytes to send over the network.
 
-```BitBuffer.BitBuffer(int capacity=defaultCapacity)``` creates a new instance of the BitBuffer class with a set capacity. Capacity is multiplied by four during serialization. For example ```new BitBuffer(375);``` creates a BitBuffer that can hold 1500 bytes of data.
+```BitBuffer.AddBool(bool value)``` writes a bool to the end of the buffer advancing the position by 1 byte.
 
-```BitBuffer.AddBool(bool value)``` writes a bool to the end of the buffer advancing its position by 1 byte.
+```BitBuffer.AddByte(byte value)``` writes a byte to the end of the buffer advancing the position by 1 byte.
 
-```BitBuffer.AddByte(byte value)``` writes a byte to the end of the buffer advancing its position by 1 byte.
+```BitBuffer.AddInt(int value)``` writes an int to the end of the buffer advancing the position by 4 bytes.
 
-```BitBuffer.AddInt(int value)``` writes an int to the end of the buffer advancing its position by 4 bytes.
+```BitBuffer.AddLong(long value)``` writes a  long to  the end of the buffer advancing the position by 8 bytes.
 
-```BitBuffer.AddLong(long value)``` writes a  long to  the end of the buffer advancing its position by 8 bytes.
+```BitBuffer.AddShort(short value)``` writes a short to the end of the buffer advancing the position by 2 bytes.
 
-```BitBuffer.AddShort(short value)``` writes a short to the end of the buffer advancing its position by 2 bytes.
+```BitBuffer.AddUInt(uint value)``` writes an uint to the end of the buffer advancing the position by 4 bytes.
 
-```BitBuffer.AddUInt(uint value)``` writes an uint to the end of the buffer advancing its position by 4 bytes.
+```BitBuffer.AddULong(ulong value)``` writes a ulong to the end of the buffer advancing the position by 8 bytes.
 
-```BitBuffer.AddULong(ulong value)``` writes a ulong to the end of the buffer advancing its position by 8 bytes.
+```BitBuffer.AddUShort(ushort value)``` writes a ushort to the end of the buffer advancing the position by 2 bytes.
 
-```BitBuffer.AddUShort(ushort value)``` writes a ushort to the end of the buffer advancing its position by 2 bytes;
+```BitBuffer.Clear()``` clears all data from the buffer, resetting its position back to zero.
+
+```BitBuffer.FromArray(byte[] data, int length)``` populates the buffer with the data in the provided array.
+
+```BitBuffer.FromSpan(ref ReadOnlySpan<byte> span, int length``` populates the buffer with the data in the provided ReadOnlySpan.
+
+```BitBuffer.PeekBool()``` returns a bool from the buffer without advancing the position.
+
+```BitBuffer.PeekByte()``` returns a byte from the buffer without advancing the position.
+
+```BitBuffer.PeekInt()``` returns an int from the buffer without advancing the position.
+
+```BitBuffer.PeekLong()``` returns a long from the buffer without advancing the position.
+
+```BitBuffer.PeekShort()``` returns a short from the buffer without advancing the position.
+
+```BitBuffer.PeekUInt()``` returns a uint from the buffer without advancing the position.
+
+```BitBuffer.PeekULong()``` returns a ulong from the buffer without advancing the position.
+
+```BitBuffer.PeekUShort()``` returns a ushort from the buffer without advancing the position.
+
+```BitBuffer.ReadBool()``` returns a bool from the buffer advancing the position 1 byte.
+
+```BitBuffer.ReadByte()``` returns a byte from the buffer advancing the position 1 byte.
+
+```BitBuffer.ReadInt()``` returns an int from the buffer advancing the position 4 bytes.
+
+```BitBuffer.ReadLong()``` returns a long from the buffer advancing the position 8 bytes.
+
+```BitBuffer.ReadShort()``` returns a short from the buffer advancing the position 2 bytes.
+
+```BitBuffer.ReadUInt()``` readsa a uint from the buffer advancing the position 4 bytes.
+
+```BitBuffer.ReadULong()``` reads a ulong from the buffer advancing the position 8 bytes.
+
+```BitBuffer.ReadUShort()``` reads a ushort from the buffer advancing the position 2 bytes.
+
+```BitBuffer.ToArray(byte[] data)``` copies data in the buffer into the provided array returning the length.
+
+```BitBuffer.ToSpan(Span<byte> span)``` copies data in the buffer into the span returning the length.
 
 #### Connection
 Contains a managed pointer to the connection instance and a cached ID.
@@ -306,4 +376,124 @@ Contains a managed pointer to the connection instance and a cached ID.
 ```Connection.PacketsSent``` returns  the total number of packets sent during the connection.
 
 ```Connections.PacketsLost``` returns the total number of packets that were considered lost during the connection based on retransmission logic.
+
+#### HalfPrecision
+Helper class used to convert floats to ushorts and back again before sending over the network.
+
+```HalfPrecision.Dequantize(ushort value)``` returns a float  from the provided ushort. **Tip value passed into HalfPrecision.Dequantize must be a value that was returned by HalfPrecision.Quantize**
+
+```HalfPrecision.Quantize(flaot value)``` returns a ushort from the provided float.
+
+#### MemoryAllocator
+Abstract class used to implement custom memory allocator. Passed to ```RNet.Init``` as an optional parameter. If no allocator is passed to ```RNetInit``` then ```RNetAllocator``` is used by default, except for on unity where 
+
+```UnityAllocator``` is used instead.
+
+```MemoryAllocator.Free(IntPtr ptr)``` Frees the native memory for the pointer provided.
+
+```MemoryAllocator.Malloc(int size)``` returns pointer to of native memory of provided size.
+
+#### MemoryHelper
+
+```MemoryHelper.Alloc(int size)``` returns pointer of native memory of provided size.
+
+```MemoryHelper.Free(IntPtr ptr)``` Frees the native memory for the pointer provided.
+
+```MemoryHelper.Read<T>(IntPtr ptr)``` returns type `T` read from pointer.
+
+```MemoryHelper.Write<T>(T value)``` Allocates native memory, storing `value` into the memory and returning a pointer to the memory.
+
+#### NativeString
+An unmanaged type used to create  strings without any heap allocations. Memory allocated must be manually freed.
+
+```NativeString(string value)``` Creates a new instance of  ```NativeString``` allocating 2 *  string.Length  bytes of memory which must be manually freed.
+
+```NativeString.Free()```  frees the native memory allocated.
+
+```NativeString.ToString()``` return a managed string from the native memory.
+
+#### RNet
+Static class  used to initialize and manage RNet. All methods and properties in this class are safe to call from any thread at anytime.
+
+```RNet.BytesReceived``` returns the total number of bytes received on this machine during the span of the current connection.
+
+```RNet.BytesSent``` returns the total number of bytes sent on this machine during the span of the current connection.
+
+```RNet.LastReceiveTime``` returns the time in milliseconds that this machine received its last packet.
+
+```RNet.LastRoundTripTime``` returns the last received round trip time for this machine.
+
+```RNet.LastSendTime``` returns the last time in miliseconds that this machine sent its last packet.
+
+```RNet.Mtu``` returns this machines current MTU.
+
+```RNet.PacketsLost``` returns the total number of packets that failed to aknowledge being received during the span of the current connection.
+
+```RNet.PacketsSent``` returns the total number rof packets that were sent on this machine during the span of the current connection.
+
+```RNet.BroadcastReliable<IMessageObject>(ushort messageID, byte channel, T messageData)``` broadcasts a reliable message to all connections.
+
+```RNet.BroadcastReliable<IMessageObject>(ushort messageID, T messageData)``` broadcasts a reliable message to all connections.
+
+```RNet.BroadcastUnreliable<IMessageObject>(ushort messageID, byte channel, T messageData)``` broadcasts an unreliable messsage to all connections.
+
+```RNet.BroadcastUnreliable<IMessageObject>(ushort messageID, T messageData)``` broadcasts an unreliable message to all connections.
+
+```RNet.Connect(string ip, ushort port)``` connects this socket to a server, must be called only after ```RNet.InitializeServer``` or ```RNet.InitializeClient```.
+
+```RNet.Disconnect()``` disconnects this machine from all other connections.
+
+```RNet.Disconnect(Connection connection)``` disconnects the passed connection from this machine.
+
+```RNet.Init(Action initAction, MemoryAllocator allocator=null)``` initializes RNet, invoking initAction after. Must be called, then any other RNet methods cannot be used until initAction is invoked. Optionally you can pass an instance of a MemoryAllocator to be used by RNet.
+
+```RNet.InitializeClient(byte maxChannels)```  initializes an  RNet client, must not be called until ```initAction``` of  ```RNet.Init``` is called. ```maxChannels``` must be the same on every server this this client plans on connecting to.
+
+```RNet.InitializeServer(string ip, ushort port, byte maxChannels, uint maxConnections)``` initializes an RNet Server, must not be called until ```initAction``` of ```RNet.Init``` is called. ```maxChannels``` must be the same on every client and server planning to connect to this server.
+
+```RNet.RegisterExtension<T>()``` registers an RNet extension to be loaded, needs to be called prior to ```RNet.InitializeServer``` or ```RNet.InitializeClient```.
+
+```RNet.RegisterOnSocketConnectEvent(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)``` registers methods to be invoked by RNet when a socket connects. socketConnectLogicAction is invoked on the logic thread, while socketConnectGameAction is invoked on the game thread. return true from the logic thread action to prevent socketConnectGameAction from being invoked. Can be called passing both actions,  just the game action, or just the logic action.
+
+```RNet.RegisterOnSocketDisconnectEvent(Action<Connection> socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)``` registers methods to be invoked by RNet when a socket connection has ended gracefully. socketDisconnectLogicAction is invoked from the logic thread, while socketDisconnectGameAction is invoked from the game thread. return true from the logic thread to prevent socketDisconnectGameAction from being invoked. Can be called passing both actions, just the game action, or just the logic action.
+
+```RNet.RegisterOnSocketTimeoutEvent(Action<Connection> socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)``` registers methods to be invoked by RNet when a socket connection has not ended gracefully. socketTimeoutLogicAction is invoked from the logic thread, while socketTimeoutGameAction is invoked from the game thread. return true from the logic thread to prevent socketTimeoutGameAction from being invoked. Can be called passing both actions, just the game action, or just the logic action.
+
+```RNet.RegisterReceiveEvent(Action<Connection, ushort messageID, IntPtr messageData> logicReceiveAction, Action<Connection, ushort messageID, IntPtr messageData> gameReceiveAction``` registers methods to be invoked by RNet after an incoming packet has been deserialized into a network message. logiceReceiveAction is invoked from  the  logic thread while gameReceiveAction is invoked from the game thread. return true from logiceReceiveAction to prevent gameReceiveAction from being invoked. Can be called passing both actions, just the game action, or just the logic action.
+
+```RNet.SendReliable<IMessageObject>(Connection target, ushort messageID, byte channel, T messageData)``` sends a reliable message to the target ```Connection``` on the specified ```channel```.
+
+```RNet.SendReliable<IMessageObject>(Connection target, ushortMessageID, T messageData)``` sends a reliable message to the target ```Connection```.
+
+```RNet.SendUnreliable<IMessageObject>(Connection target, ushort messageID, byte channel, T messageData)``` sends an unreliable message to the target ```Connection``` on the specified ```channel```.
+
+```RNet.SendUnreliable<IMessageObject>(Connection target, ushortMessageID, T messageData)``` sends an unreliable message to the target ```Connection```.
+
+```RNet.TearDown()``` Deinitializes RNet and all threads being used deallocating all native memory allocated, must always be called especially in unity projects or editor may crash after entering and exiting playmode several times.
+
+```RNet.UnRegisterOnSocketConnectEvent(Action<Connection> socketConnectLogicAction = null, Action<Connection> socketConnectGameAction = null)``` unregisters methods to be invoked by RNet when a socket connects. Can be called passing both actions, just the game action, or just the logic action.
+
+```RNet.UnRegisterOnSocketDisconnectEvent(Action<Connection> socketDisconnectLogicAction = null, Action<Connection> socketDisconnectGameAction = null)``` unregisters methods to be invoked by RNet when a socket connection has ended gracefully. Can be called passing both actions, just the game action, or just the logic action.
+
+```RNet.RegisterOnSocketTimeoutEvent(Action<Connection> socketTimeoutLogicAction = null, Action<Connection> socketTimeoutGameAction = null)``` unregisters methods to be invoked by RNet when a socket connection has not ended gracefully. Can be called passing both actions, just the game action, or just the logic action.
+
+```RNet.RegisterReceiveEvent(Action<Connection, ushort messageID, IntPtr messageData> logicReceiveAction, Action<Connection, ushort messageID, IntPtr messageData> gameReceiveAction``` registers methods to be invoked by RNet after an incoming packet has been deserialized into a network message. Can be called passing both actions, just the game action, or just the logic action.
+
+#### RNetExtension
+Base class used to implement self contained, reusable extensions for RNet.
+
+```RNetExtension.RNetExtension(WorkerCollection workers)``` called automatically by RNet when loading the extension.
+
+```RNet.OnSocketConnect(ThreadType threadType, Connection connection)``` called automatically by RNet when a socket connects.
+
+```RNet.OnSocketDisconnect(ThreadType threadType, Connection connection)``` called automatically by RNet when a socket disconnects.
+
+```RNet.OnSocketReceive(ThreadType threadType, Connection connection, ushort messageID, IntPtr messageData)``` called automatically by RNet after a message has been deserialized. Return true from this method to prevent the methods registered by RNet.RegisterReceiveEvent from being invoked.
+
+```RNet.OnSocketTimeout(ThreadType threadType, Connection connection)``` called automatically by RNet when a socket times out.
+
+```RNet.OnThreadMessageReceived(ThreadType threadType, ushort threadMessageID, IntPtr threadMessageData)``` called automatically by RNet when a thread receives a message from another thread. This is not related to network messages in any way.
+
+
+
 

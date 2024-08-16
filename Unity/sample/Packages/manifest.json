@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "com.rybakatya.enet": "https://github.com/rybakatya/RapidNet.git?path=/Unity/ENet",
-    "com.rybakatya.rnet": "https://github.com/rybakatya/RapidNet.git?path=/Unity/RapidNetworkLibrary",
     "com.unity.collab-proxy": "2.4.4",
     "com.unity.timeline": "1.8.7",
     "com.unity.modules.ai": "1.0.0",

@@ -1,19 +1,5 @@
 {
   "dependencies": {
-    "com.rybakatya.enet": {
-      "version": "https://github.com/rybakatya/RapidNet.git?path=/Unity/ENet",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "2803ca165462d6fc2e502e90eab8b1de8b4a466e"
-    },
-    "com.rybakatya.rnet": {
-      "version": "https://github.com/rybakatya/RapidNet.git?path=/Unity/RapidNetworkLibrary",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "2803ca165462d6fc2e502e90eab8b1de8b4a466e"
-    },
     "com.unity.collab-proxy": {
       "version": "2.4.4",
       "depth": 0,

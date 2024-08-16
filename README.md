@@ -6,7 +6,7 @@ RNet is an engine agnostic lock free multithreaded reliable udp library designed
 * Connection Managment
 * Server to server communication
 * Clients can connect to multiple servers
-* Blazing fast serialization
+* Blazing fast abstract data serialization
 * Custom extensions to easily add features
 * Lock free thread to thread communication
 * Server/Client code stripping. No server code will be included with client builds.

@@ -214,3 +214,96 @@ public class PlayerUpdateNetMessageSerializer : Serializer
 A few things to note going on here,  ```NetworkMessageIDS``` holds the values that the network message id generate feeds. You do not have to manage these ids. Also note the attribute on ```PlayerUpdateNetMessageSerializer``` this is how  serializers are tied to specific messages internally.  You can uncheck generate serializer if you have some outlying cases that need hand written code. But it  advised to use the generated code as it is less prone to mistakes.
 
 
+Sending the message is easy. Inside ```NetworkHandler.cs``` just  call ```RNet.SendReliable``` passing in our generated message id and our generated type. ```LogicOnSocketConnect``` should now look like this.
+
+```csharp
+    private void LogicOnSocketConnect(Connection connection)
+    {
+#if SERVER
+        Debug.Log("[Logic Thread]: A client has connected to the server");
+        RNet.SendReliable<PlayerUpdateNetMessage>(connection, NetworkMessageIDS.PlayerUpdateNetMessage, new PlayerUpdateNetMessage()
+        {
+            armor = 150,
+            gold = 245323,
+            health = 255
+        });
+
+#endif
+    }
+```
+Navigate to  ```RNet/SwitchTarget/Client``` and set the target to client again. Now we are going to register the receive  event, by making a call to ```RNet.RegisterReceiveEvent```. Your ```onInit()``` method should look like this.
+
+```csharp
+    private void onInit()
+    {
+#if SERVER
+        RNet.RegisterOnSocketConnectEvent(socketConnectLogicAction: LogicOnSocketConnect);
+        RNet.InitializeServer("127.0.0.1", 7777, 255, 1024);
+#elif  CLIENT
+        RNet.RegisterReceiveEvent(logicReceiveAction: LogicOnMessageReceived);
+        RNet.InitializeClient(255);
+            RNet.Connect("127.0.0.1", 7777);
+#endif
+    }
+
+    private void LogicOnMessageReceived(Connection connection, ushort messageID, IntPtr messageData)
+    {
+        switch (messageID)
+        {
+#if CLIENT
+            case NetworkMessageIDS.PlayerUpdateNetMessage:
+                //convert the pointer back into our message struct.
+                PlayerUpdateNetMessage updateMessage = MemoryHelper.Read<PlayerUpdateNetMessage>(messageData);
+                Debug.Log("Message received from server! Message ID: " + messageID + ", " +  "health: " + updateMessage.health + " gold: " + updateMessage.gold + " armor: " + updateMessage.armor);
+                break;
+
+#endif
+        }
+    }
+```
+
+# API
+#### BitBuffer
+A class used to serialize data to bits to be sent over the network.
+
+```BitBuffer.BitBuffer(int capacity=defaultCapacity)``` creates a new instance of the BitBuffer class with a set capacity. Capacity is multiplied by four during serialization. For example ```new BitBuffer(375);``` creates a BitBuffer that can hold 1500 bytes of data.
+
+```BitBuffer.AddBool(bool value)``` writes a bool to the end of the buffer advancing its position by 1 byte.
+
+```BitBuffer.AddByte(byte value)``` writes a byte to the end of the buffer advancing its position by 1 byte.
+
+```BitBuffer.AddInt(int value)``` writes an int to the end of the buffer advancing its position by 4 bytes.
+
+```BitBuffer.AddLong(long value)``` writes a  long to  the end of the buffer advancing its position by 8 bytes.
+
+```BitBuffer.AddShort(short value)``` writes a short to the end of the buffer advancing its position by 2 bytes.
+
+```BitBuffer.AddUInt(uint value)``` writes an uint to the end of the buffer advancing its position by 4 bytes.
+
+```BitBuffer.AddULong(ulong value)``` writes a ulong to the end of the buffer advancing its position by 8 bytes.
+
+```BitBuffer.AddUShort(ushort value)``` writes a ushort to the end of the buffer advancing its position by 2 bytes;
+
+#### Connection
+Contains a managed pointer to the connection instance and a cached ID.
+
+```Connection.BytesSent``` returns the total number of bytes sent during the connection.
+
+```Connection.BytesReceived``` returns the total number of bytes received during the connection.
+
+```Connection.ID```  returns a numeric ID for the connection. Always 0 on the client.
+
+```Connection.IpAddress``` returns a native string that represents the IPAddress of the connection.
+
+```Connection.Port``` returns the port the connection is using.
+
+```Connection.LastReceiveTime``` returns the last time a packet has been received.
+
+```Connection.LastRoundTripTime``` returns the round trip time at the time of the last update.
+
+```Connection.Mtu``` returns an MTU
+
+```Connection.PacketsSent``` returns  the total number of packets sent during the connection.
+
+```Connections.PacketsLost``` returns the total number of packets that were considered lost during the connection based on retransmission logic.
+

@@ -2,7 +2,7 @@
 using System.Threading;
 
 
-namespace RapidNetworkLibrary.Threading
+namespace RapidNet.Threading
 {
 
     /// <summary>

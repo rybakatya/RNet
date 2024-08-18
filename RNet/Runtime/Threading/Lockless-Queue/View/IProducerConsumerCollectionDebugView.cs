@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-namespace RapidNetworkLibrary.Threading.Debug
+namespace RapidNet.Threading.LocklessQueue
 {
     internal sealed class IProducerConsumerCollectionDebugView<T>
     {

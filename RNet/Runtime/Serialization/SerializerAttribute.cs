@@ -1,4 +1,4 @@
-﻿namespace RapidNetworkLibrary.Serialization
+﻿namespace RapidNet.Serialization
 {
 
     /// <summary>

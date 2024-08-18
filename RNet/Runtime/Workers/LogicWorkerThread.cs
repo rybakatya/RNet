@@ -1,19 +1,19 @@
 ﻿using ENet;
 using System;
-using RapidNetworkLibrary.Threading;
-using RapidNetworkLibrary.Connections;
+using RapidNet.Threading;
+using RapidNet.Connections;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using RapidNetworkLibrary.Logging;
+using RapidNet.Logging;
 using System.Reflection;
-using RapidNetworkLibrary.Serialization;
-using RapidNetworkLibrary.Threading.ThreadEvents;
-using RapidNetworkLibrary.Memory;
+using RapidNet.Serialization;
+using RapidNet.Threading.ThreadEvents;
+using RapidNet.Memory;
 using System.Diagnostics;
 
-using RapidNetworkLibrary.Extensions;
+using RapidNet.Extensions;
 
-namespace RapidNetworkLibrary.Workers
+namespace RapidNet.Workers
 {
 
     /// <summary>

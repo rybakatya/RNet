@@ -1,16 +1,16 @@
 ﻿using ENet;
 using System;
 using System.Runtime.InteropServices;
-using RapidNetworkLibrary.Threading;
-using RapidNetworkLibrary.Threading.ThreadEvents;
-using RapidNetworkLibrary.Logging;
+using RapidNet.Threading;
+using RapidNet.Threading.ThreadEvents;
+using RapidNet.Logging;
 using System.Collections.Generic;
-using RapidNetworkLibrary.Memory;
-using RapidNetworkLibrary.Extensions;
+using RapidNet.Memory;
+using RapidNet.Extensions;
 
 
 
-namespace RapidNetworkLibrary.Workers
+namespace RapidNet.Workers
 {
     /// <summary>
     /// 
@@ -207,7 +207,7 @@ namespace RapidNetworkLibrary.Workers
                     break;
 
 #if CLIENT
-                case (ushort)WorkerThreadMessageID.SendInitClient:
+                case (ushort)WorkerThreadEventID.SendInitClient:
                     InitializeENetClient(MemoryHelper.Read<byte>(data));
                     break;
 #endif

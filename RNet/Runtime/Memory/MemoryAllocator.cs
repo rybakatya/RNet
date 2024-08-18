@@ -9,7 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
 #endif
 
-namespace RapidNetworkLibrary.Memory
+namespace RapidNet.Memory
 {
 
     /// <summary>

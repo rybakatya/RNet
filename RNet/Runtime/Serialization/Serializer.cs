@@ -1,7 +1,7 @@
 ﻿using System;
 
 
-namespace RapidNetworkLibrary.Serialization
+namespace RapidNet.Serialization
 {
     /// <summary>
     /// Base class used by the logic thread for serialization

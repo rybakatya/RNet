@@ -23,7 +23,7 @@
 using System;
 
 
-namespace RapidNetworkLibrary.Buffers
+namespace RapidNet.Buffers
 {
     internal sealed partial class DefaultArrayPool<T> : ArrayPool<T> {
 		private const int DefaultMaxArrayLength = 1024 * 1024;

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
-    <Configurations>Debug;ServerDebug;ClientDebug</Configurations>
+    <Configurations>ServerDebug;ClientDebug</Configurations>
     <PlatformTarget>x64</PlatformTarget>
 	  <IntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</IntermediateOutputPath>
 	  <BaseIntermediateOutputPath>$(SolutionDir)\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>

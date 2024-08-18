@@ -26,7 +26,7 @@ using System;
 	using UnityEngine;
 #endif
 
-namespace RapidNetworkLibrary.Buffers
+namespace RapidNet.Buffers
 {
     internal sealed class ArrayPoolEventSource
     {

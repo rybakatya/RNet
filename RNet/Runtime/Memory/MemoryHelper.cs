@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
 #endif
 
-namespace RapidNetworkLibrary.Memory
+namespace RapidNet.Memory
 {
     /// <summary>
     /// Utility class used to make working with pointers a little  easier, also a wrapper for the allocator you call in RNet.Init

@@ -4,7 +4,7 @@ using ENet;
 using Unity.Collections.LowLevel.Unsafe;
 #endif
 
-namespace RapidNetworkLibrary.Threading.ThreadEvents
+namespace RapidNet.Threading.ThreadEvents
 {
     internal struct SerializeNetworkMessageThreadEvent
     {

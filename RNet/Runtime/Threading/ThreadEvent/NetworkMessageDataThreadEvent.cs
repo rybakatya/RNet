@@ -1,8 +1,8 @@
 ﻿using System;
-using RapidNetworkLibrary.Connections;
+using RapidNet.Connections;
 
 
-namespace RapidNetworkLibrary.Threading.ThreadEvents
+namespace RapidNet.Threading.ThreadEvents
 {
     internal struct NetworkMessageDataThreadEvent
     {

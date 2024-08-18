@@ -1,12 +1,12 @@
-﻿using RapidNetworkLibrary.Connections;
-using RapidNetworkLibrary.Extensions;
-using RapidNetworkLibrary.Logging;
-using RapidNetworkLibrary.Memory;
-using RapidNetworkLibrary.Threading;
-using RapidNetworkLibrary.Threading.ThreadEvents;
+﻿using RapidNet.Connections;
+using RapidNet.Extensions;
+using RapidNet.Logging;
+using RapidNet.Memory;
+using RapidNet.Threading;
+using RapidNet.Threading.ThreadEvents;
 using System;
 
-namespace RapidNetworkLibrary.Workers
+namespace RapidNet.Workers
 {
     /// <summary>
     /// 

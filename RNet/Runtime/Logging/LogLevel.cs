@@ -1,4 +1,4 @@
-﻿namespace RapidNetworkLibrary.Logging
+﻿namespace RapidNet.Logging
 {
     /// <summary>
     /// Used to determine the severity level when logging text.

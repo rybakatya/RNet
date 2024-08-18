@@ -1,10 +1,13 @@
-﻿using RapidNetworkLibrary.Serialization;
+﻿using RapidNet.Serialization;
 using System;
 
-/// <summary>
-/// Interface that all NetworkMessage structs should implement.
-/// </summary>
-public interface IMessageObject
+namespace RapidNet.Serialization
 {
-   
+    /// <summary>
+    /// Interface that all NetworkMessage structs should implement.
+    /// </summary>
+    public interface IMessageObject
+    {
+
+    }
 }

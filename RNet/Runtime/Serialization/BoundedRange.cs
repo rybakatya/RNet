@@ -31,7 +31,7 @@ using System.Numerics;
 	using UnityEngine;
 #endif
 
-namespace RapidNetworkLibrary.Serialization
+namespace RapidNet.Serialization
 {
     internal struct QuantizedVector2
     {

@@ -1,14 +1,15 @@
 ﻿using System;
 using ENet;
-using RapidNetworkLibrary.Connections;
-using RapidNetworkLibrary.Extensions;
-using RapidNetworkLibrary.Logging;
-using RapidNetworkLibrary.Memory;
-using RapidNetworkLibrary.Threading.ThreadEvents;
-using RapidNetworkLibrary.Workers;
+using RapidNet.Connections;
+using RapidNet.Extensions;
+using RapidNet.Logging;
+using RapidNet.Memory;
+using RapidNet.Serialization;
+using RapidNet.Threading.ThreadEvents;
+using RapidNet.Workers;
 
 
-namespace RapidNetworkLibrary
+namespace RapidNet
 {
     /// <summary>
     /// Static class used to initialize and manage RNet. Everything in this class is safe in all threads at all times.
@@ -209,7 +210,7 @@ namespace RapidNetworkLibrary
 #elif CLIENT
         public static void InitializeClient(byte maxChannels)
         {
-            workers.socketWorker.Enqueue((ushort)WorkerThreadMessageID.SendInitClient, maxChannels);
+            workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendInitClient, maxChannels);
         }
 #endif
 

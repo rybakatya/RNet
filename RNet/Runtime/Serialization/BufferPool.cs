@@ -1,16 +1,18 @@
-﻿using RapidNetworkLibrary.Serialization;
+﻿using RapidNet.Serialization;
 using System;
-
-internal static class BufferPool
+namespace RapidNet.Serialization
 {
-    [ThreadStatic]
-    private static BitBuffer bitBuffer;
-
-    public static BitBuffer GetBitBuffer()
+    internal static class BufferPool
     {
-        if (bitBuffer == null)
-            bitBuffer = new BitBuffer(1024);
+        [ThreadStatic]
+        private static BitBuffer bitBuffer;
 
-        return bitBuffer;
+        public static BitBuffer GetBitBuffer()
+        {
+            if (bitBuffer == null)
+                bitBuffer = new BitBuffer(1024);
+
+            return bitBuffer;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace LocklessQueue
+﻿namespace RapidNet.Threading.LocklessQueue
 {
     /// <summary>
     /// A common interface used for concurrent queues.

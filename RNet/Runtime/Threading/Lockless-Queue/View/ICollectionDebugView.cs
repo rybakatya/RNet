@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace RapidNetworkLibrary.Threading.Debug
+namespace RapidNet.Threading.LocklessQueue
 {
     internal sealed class ICollectionDebugView<TKey>
         where TKey : notnull

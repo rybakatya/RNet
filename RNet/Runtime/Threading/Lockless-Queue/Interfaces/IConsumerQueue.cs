@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LocklessQueue
+namespace RapidNet.Threading.LocklessQueue
 {
     /// <summary>
     /// A common interface that represents the consumer side of a concurrent queue.

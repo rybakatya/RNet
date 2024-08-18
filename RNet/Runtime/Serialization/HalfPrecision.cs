@@ -23,7 +23,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace RapidNetworkLibrary.Serialization
+namespace RapidNet.Serialization
 {
     /// <summary>
     /// Helper class used to convert floats to ushorts before sending over the network to preserve bandwidth

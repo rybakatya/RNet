@@ -1,4 +1,4 @@
-﻿using RapidNetworkLibrary.Memory;
+﻿using RapidNet.Memory;
 using System;
 using System.Runtime.InteropServices;
 
@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 #endif 
 
-namespace RapidNetworkLibrary
+namespace RapidNet
 {
     /// <summary>
     /// An unmanaged class used to represnt string in a blittable way.

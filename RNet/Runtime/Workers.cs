@@ -1,10 +1,10 @@
-﻿using RapidNetworkLibrary.Connections;
+﻿using RapidNet.Connections;
 
-using RapidNetworkLibrary.Workers;
+using RapidNet.Workers;
 using System;
 
 
-namespace RapidNetworkLibrary
+namespace RapidNet
 {
     /// <summary>
     /// Holds references to the game, logic, and network  threads.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace LocklessQueue.Sets
+namespace RapidNet.Threading.LocklessQueue
 {
     internal static partial class HashHelpers
     {

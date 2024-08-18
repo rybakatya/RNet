@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 	using UnityEngine.Assertions;
 #endif
 
-namespace RapidNetworkLibrary.Buffers
+namespace RapidNet.Buffers
 {
     internal static class Utilities
     {

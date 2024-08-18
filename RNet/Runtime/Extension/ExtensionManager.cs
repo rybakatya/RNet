@@ -1,9 +1,9 @@
-﻿using RapidNetworkLibrary.Connections;
+﻿using RapidNet.Connections;
 using System;
 using System.Collections.Generic;
 
 
-namespace RapidNetworkLibrary.Extensions
+namespace RapidNet.Extensions
 {
     internal class ExtensionManager
     {

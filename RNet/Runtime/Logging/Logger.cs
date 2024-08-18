@@ -1,7 +1,7 @@
 ﻿using System;
 
 
-namespace RapidNetworkLibrary.Logging
+namespace RapidNet.Logging
 {
     /// <summary>
     /// Used to log strings of text to the console window.

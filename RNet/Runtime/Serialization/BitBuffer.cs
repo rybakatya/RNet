@@ -6,7 +6,7 @@ using System.Text;
 	using UnityEngine.Assertions;
 #endif
 
-namespace RapidNetworkLibrary.Serialization
+namespace RapidNet.Serialization
 {
     /// <summary>
     /// Class used to write values to a buffer that can be converted to a span  of bytes to send over the network. Can also read data from a span of bytes.

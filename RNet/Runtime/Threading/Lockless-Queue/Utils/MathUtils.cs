@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LocklessQueue.Utils
+namespace RapidNet.Threading.LocklessQueue
 {
     internal static class MathUtils
     {

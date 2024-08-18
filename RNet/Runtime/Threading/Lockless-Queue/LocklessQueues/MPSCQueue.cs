@@ -1,13 +1,11 @@
-﻿using LocklessQueue.Utils;
-using RapidNetworkLibrary.Threading.Debug;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace LocklessQueue.Queues
+namespace RapidNet.Threading.LocklessQueue
 {
     /// <summary>
     /// Represents a thread-safe first-in, first-out collection of objects.

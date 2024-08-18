@@ -1,14 +1,14 @@
-﻿using RapidNetworkLibrary.Extensions;
-using RapidNetworkLibrary.Logging;
+﻿using RapidNet.Extensions;
+using RapidNet.Logging;
 
-using RapidNetworkLibrary.Serialization;
+using RapidNet.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 
 
-namespace RapidNetworkLibrary.Connections
+namespace RapidNet.Connections
 {
     
     internal class ConnectionHandler

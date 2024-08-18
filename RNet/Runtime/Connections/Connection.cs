@@ -2,7 +2,7 @@
 using System;
 
 
-namespace RapidNetworkLibrary.Connections
+namespace RapidNet.Connections
 {
     /// <summary>
     /// Contains a managed pointer to the connection instance and a cached ID.
@@ -36,6 +36,8 @@ namespace RapidNetworkLibrary.Connections
                 lastSendTime = sendLastTime,
                 lastRoundTripTime = lastRTT,
                 mtu = _mtu,
+                ipAddress = ip,
+                port = port,
                 packetsSent = sentPackets,
                 packetsLost = lostPackets
             };

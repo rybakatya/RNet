@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 #endif
 
-namespace RapidNetworkLibrary.Memory
+namespace RapidNet.Memory
 {
 #if ENABLE_MONO || ENABLE_IL2CPP
     internal class UnityAllocator : MemoryAllocator

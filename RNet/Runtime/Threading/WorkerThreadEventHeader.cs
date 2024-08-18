@@ -1,5 +1,5 @@
 ﻿using System;
-namespace RapidNetworkLibrary.Threading
+namespace RapidNet.Threading
 {
     /// <summary>
     /// Structure used to wrap thread messages into unmanaged blittable data.

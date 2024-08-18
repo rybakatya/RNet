@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace LocklessQueue.Queues
+namespace RapidNet.Threading.LocklessQueue
 {
     [StructLayout(LayoutKind.Explicit, Size = 3 * CACHE_LINE_SIZE)]
     [DebuggerDisplay("Head = {Head}, Tail = {Tail}")]

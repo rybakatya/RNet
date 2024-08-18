@@ -24,7 +24,7 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 
 
-namespace RapidNetworkLibrary.Buffers
+namespace RapidNet.Buffers
 {
     internal abstract class ArrayPool<T>
     {

@@ -1,4 +1,4 @@
-﻿namespace RapidNetworkLibrary.Extensions
+﻿namespace RapidNet.Extensions
 {
     /// <summary>
     /// Enum used to tag  what thread is sending data.

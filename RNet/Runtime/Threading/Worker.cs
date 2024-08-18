@@ -1,11 +1,12 @@
-﻿using LocklessQueue.Queues;
-using RapidNetworkLibrary.Logging;
-using RapidNetworkLibrary.Memory;
-using RapidNetworkLibrary.Threading.ThreadEvents;
+﻿
+using RapidNet.Logging;
+using RapidNet.Memory;
+using RapidNet.Threading.LocklessQueue;
+using RapidNet.Threading.ThreadEvents;
 using System;
 
 
-namespace RapidNetworkLibrary.Threading
+namespace RapidNet.Threading
 {
     /// <summary>
     /// Base class for workers, are just classes you can enque events into.

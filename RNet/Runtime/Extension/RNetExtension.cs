@@ -1,9 +1,9 @@
-using RapidNetworkLibrary.Connections;
+using RapidNet.Connections;
 using System;
 using System.Collections;
 
 
-namespace RapidNetworkLibrary.Extensions
+namespace RapidNet.Extensions
 {
 
 

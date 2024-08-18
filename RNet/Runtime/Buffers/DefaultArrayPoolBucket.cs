@@ -23,9 +23,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using RapidNetworkLibrary.Buffers;
+using RapidNet.Buffers;
 
-namespace RapidNetworkLibrary.Buffers
+namespace RapidNet.Buffers
 {
     internal sealed partial class DefaultArrayPool<T> : ArrayPool<T> {
 		private sealed class Bucket {

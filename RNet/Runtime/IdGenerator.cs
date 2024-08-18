@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 
 
-namespace RapidNetworkLibrary
+namespace RapidNet
 {
-    internal class IDGenerator
+    public class IDGenerator
     {
         public List<ushort> ids;
         public IDGenerator(ushort size)

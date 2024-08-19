@@ -9,7 +9,7 @@ namespace RapidNet.Connections
     /// </summary>
     public struct Connection : IEquatable<Connection>
     {
-        private uint peer;
+        private ushort peer;
         
 
 
@@ -25,7 +25,7 @@ namespace RapidNet.Connections
 
         private ushort port;
 
-        internal static Connection Create(uint id, NativeString ip, ushort port, ulong sentBytes, ulong receivedBytes, uint receivedLastTime, uint sendLastTime, uint lastRTT, uint _mtu, ulong sentPackets, ulong lostPackets)
+        internal static Connection Create(ushort id, NativeString ip, ushort port, ulong sentBytes, ulong receivedBytes, uint receivedLastTime, uint sendLastTime, uint lastRTT, uint _mtu, ulong sentPackets, ulong lostPackets)
         {
             return new Connection()
             {
@@ -42,7 +42,7 @@ namespace RapidNet.Connections
                 packetsLost = lostPackets
             };
         }
-        internal static Connection Create(uint id, NativeString ip, ushort port)
+        internal static Connection Create(ushort id, NativeString ip, ushort port)
         {
             return new Connection(id, ip, port);
         }
@@ -56,7 +56,7 @@ namespace RapidNet.Connections
         {
             connection.ipAddress.Free();
         }
-        internal Connection(uint p, NativeString ip, ushort prt)
+        internal Connection(ushort p, NativeString ip, ushort prt)
         {
             peer = p;
             
@@ -97,7 +97,7 @@ namespace RapidNet.Connections
         /// <summary>
         /// Returns a numeric id representing this connection.
         /// </summary>
-        public uint ID
+        public ushort ID
         {
             get { return peer; }
         }

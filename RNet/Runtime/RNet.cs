@@ -106,7 +106,7 @@ namespace RapidNet
         /// </summary>
         public static void TearDown()
         {
-
+            
             workers.gameWorker.OnDestroy();
 
             workers.logicWorker.OnDestroy();
@@ -134,8 +134,16 @@ namespace RapidNet
         public static void Tick()
         {
             if (!isInit)
-                return;
-            workers.gameWorker.Tick();
+            {
+                if (workers.gameWorker == null)
+                    return;
+                
+                workers.gameWorker.Tick();
+            }
+            else
+            {
+                workers.gameWorker.Tick();
+            }
         }
         private static void OnSocketInit()
         {       
@@ -149,26 +157,29 @@ namespace RapidNet
         {
             Logger.Log(LogLevel.Info, "Logic Thread Initialized!");
 
-            workers.gameWorker = new GameWorker(workers, extensionManager);
+            workers.gameWorker = new GameWorker(onGameInit, workers, extensionManager);
             workers.gameWorker.shouldRun = true;
+            
+        }
+
+        private static void onGameInit()
+        {
             Logger.Log(LogLevel.Info, "Main Thread Initialized!");
-            
-            
+
+
             Logger.Log(LogLevel.Info, "RNetInitialized!");
             if (onInit != null)
                 onInit();
 
-            
+
             isInit = true;
 
-
+            workers.socketWorker.Enqueue(WorkerThreadEventID.SendRegisterThreadEvent);
+            workers.logicWorker.Enqueue(WorkerThreadEventID.SendRegisterThreadEvent);
+            extensionManager.OnThreadRegistered(ThreadType.Game);
         }
 
-        private static void OnEntityThreadInit()
-        {
-            Logger.Log(LogLevel.Info, "Entity Thread Is Initialized!");
-            
-        }
+        
 
 #if SERVER
 
@@ -241,7 +252,7 @@ namespace RapidNet
         }
 
 
-        internal static void SendMessage<T>(uint target, ushort messageID, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
+        public static void SendMessage<T>(uint target, ushort messageID, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
         {
             var ptr = MemoryHelper.Write(message);
 
@@ -255,7 +266,7 @@ namespace RapidNet
                 flags = flags | PacketFlags.NoAllocate
             };
 
-            workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendSerializeMessageEvent, msg);
+            workers.logicWorker.Enqueue(WorkerThreadEventID.SendSerializeMessageEvent, msg);
         }
         
         /// <summary>

@@ -23,20 +23,22 @@ namespace RapidNet.Workers
 
         private readonly WorkerCollection _workers;
         private readonly ExtensionManager _extensionManager;
-        
+        private readonly Action onInit;
+        private bool isInit = false;
         ///
-        internal GameWorker(WorkerCollection workers, ExtensionManager extensionManager)
+        internal GameWorker(Action initAction, WorkerCollection workers, ExtensionManager extensionManager)
         {
             _workers = workers;
             _extensionManager = extensionManager;
+            onInit += initAction;
         }
 
-        internal override void OnConsume(ushort eventID, IntPtr data)
+        public override void OnConsume(ushort eventID, IntPtr data)
         {
-            
+           
             switch (eventID)
             {
-                case (ushort)WorkerThreadEventID.SendConnection:
+                case WorkerThreadEventID.SendConnection:
                     var connection = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketConnect(ThreadType.Game,connection);
                     
@@ -44,7 +46,7 @@ namespace RapidNet.Workers
                         onSocketConnected(connection);                  
                     break;
 
-                case (ushort)WorkerThreadEventID.SendDisconnection:
+                case WorkerThreadEventID.SendDisconnection:
                     var con = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketDisconnect(ThreadType.Game,con);
                     if(onSocketDisconnected != null) 
@@ -52,20 +54,24 @@ namespace RapidNet.Workers
                     break;
 
 
-                case (ushort)WorkerThreadEventID.SendTimeout:
+                case WorkerThreadEventID.SendTimeout:
                     var c = MemoryHelper.Read<Connection>(data);
                     _extensionManager.OnSocketTimeout(ThreadType.Game, c);
                     if(onSocketTimedout != null)
                         onSocketTimedout(c);
                     break;
 
-                case (ushort)WorkerThreadEventID.SendNetworkMessageToGameThread:
+                case WorkerThreadEventID.SendNetworkMessageToGameThread:
                     var msgData = MemoryHelper.Read<NetworkMessageDataThreadEvent>(data);
                     Logging.Logger.Log(LogLevel.Info, "Received message id " + msgData.messageID.ToString());
-                    
 
-                    if (onSocketReceive != null)
-                        onSocketReceive(msgData.sender, msgData.messageID, msgData.messageData);
+                    var value = _extensionManager.OnSocketReceive(ThreadType.Game, msgData.sender, msgData.messageID, msgData.messageData);
+                    if (value == false)
+                    {
+
+                        if (onSocketReceive != null)
+                            onSocketReceive(msgData.sender, msgData.messageID, msgData.messageData);
+                    }
 
                     MemoryHelper.Free(msgData.messageData);
                     break;
@@ -81,6 +87,13 @@ namespace RapidNet.Workers
 
         internal void Tick()
         {
+            if (!isInit)
+            {
+                if (onInit != null)
+                    onInit();
+                isInit = true;
+            }
+
             Consume();           
         }
 

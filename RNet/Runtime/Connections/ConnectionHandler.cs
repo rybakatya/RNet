@@ -39,7 +39,7 @@ namespace RapidNet.Connections
 
 
 
-        internal unsafe void HandleSocketConnection(uint peerID, NativeString ip, ushort port)
+        internal unsafe void HandleSocketConnection(ushort peerID, NativeString ip, ushort port)
 
         {
 
@@ -56,7 +56,7 @@ namespace RapidNet.Connections
 
 
             if(value == false)
-                workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendConnection, c);
+                workers.gameWorker.Enqueue(WorkerThreadEventID.SendConnection, c);
         }
 
         internal void HandleDisconnect(uint peer)
@@ -67,7 +67,7 @@ namespace RapidNet.Connections
                 value = workers.logicWorker.onSocketDisconnect(connections[peer]);
 
             if(value == false)
-                workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendDisconnection, connections[peer]);
+                workers.gameWorker.Enqueue(WorkerThreadEventID.SendDisconnection, connections[peer]);
 
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
@@ -83,7 +83,7 @@ namespace RapidNet.Connections
                 value = workers.logicWorker.onSocketDisconnect(connections[peer]);
 
             if(value == false)
-                workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendTimeout, connections[peer]);
+                workers.gameWorker.Enqueue(WorkerThreadEventID.SendTimeout, connections[peer]);
             
             Connection.Destroy(connections[peer]);
             connections.Remove(peer);
@@ -103,6 +103,11 @@ namespace RapidNet.Connections
             {
                 kvp.Value.IpAddress.Free();
             }
+        }
+
+        internal bool IsSet(uint target)
+        {
+            return connections.ContainsKey(target);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace RapidNet.Threading
     {
         internal bool shouldRun;
         internal MPSCQueue<IntPtr> eventQueue = new MPSCQueue<IntPtr>(1024);
-        internal abstract void OnConsume(ushort eventID, IntPtr data);
+        public abstract void OnConsume(ushort eventID, IntPtr data);
 
         /// <summary>
         /// 

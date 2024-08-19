@@ -147,7 +147,7 @@ namespace RapidNet.Workers
         }
 
 
-        internal override void OnConsume(ushort eventID, IntPtr data)
+        public override void OnConsume(ushort eventID, IntPtr data)
         {
 
             switch (eventID)
@@ -168,14 +168,20 @@ namespace RapidNet.Workers
 
                 case (ushort)WorkerThreadEventID.SendSerializeMessageEvent:
                     
-
+                    
                     var msg = MemoryHelper.Read<SerializeNetworkMessageThreadEvent>(data);
-                    //SendMessage(msg.target, msg.id, msg.channel, msg.flags, msg.messageObjectPointer);
+                    
+
                     SerializeOutgoingMessage(msg);
                     break;
 
                 case (ushort)WorkerThreadEventID.SendDeserializeNetworkMessage:
                     DeserializeIncomingMessage(MemoryHelper.Read<DeserializeNetworkMessageThreadEvent>(data));
+                    break;
+
+                case WorkerThreadEventID.SendRegisterThreadEvent:
+
+                    _extensionManager.OnThreadRegistered(ThreadType.Logic);
                     break;
 
                 default:
@@ -200,22 +206,13 @@ namespace RapidNet.Workers
 
             buffer.FromSpan(ref span, data.packet.Length);
             var msgID = buffer.ReadUShort();
-            Logger.Log(LogLevel.Info, "Packet received on logic thread, deserializing...");
+            Logger.Log(LogLevel.Info, "Packet received on logic thread, deserializing msg  id " + msgID);
 
-            if (msgID == ushort.MaxValue)
+            if (_extensionManager.CheckInterceptMessage(msgID, buffer) == false)
             {
 
-
-            }
-            else
-            {
                 var ptr = serializers[msgID].Deserialize(buffer);
-                var msgData = new NetworkMessageDataThreadEvent()
-                {
-                    messageID = msgID,
-                    messageData = ptr,
-                    sender = connectionHandler.GetConnection(data.sender)
-                };
+
                 bool value = _extensionManager.OnSocketReceive(ThreadType.Logic, connectionHandler.GetConnection(data.sender), msgID, ptr);
 
                 if (value == false)
@@ -224,7 +221,15 @@ namespace RapidNet.Workers
                         value = onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
 
                     if (value == false)
-                        workers.gameWorker.Enqueue((ushort)WorkerThreadEventID.SendNetworkMessageToGameThread, msgData);
+                    {
+                        var msgData = new NetworkMessageDataThreadEvent()
+                        {
+                            messageID = msgID,
+                            messageData = ptr,
+                            sender = connectionHandler.GetConnection(data.sender)
+                        };
+                        workers.gameWorker.Enqueue(WorkerThreadEventID.SendNetworkMessageToGameThread, msgData);
+                    }
                 }
             }
 

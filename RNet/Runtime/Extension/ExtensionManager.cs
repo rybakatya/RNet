@@ -1,4 +1,5 @@
 ﻿using RapidNet.Connections;
+using RapidNet.Serialization;
 using System;
 using System.Collections.Generic;
 
@@ -19,6 +20,16 @@ namespace RapidNet.Extensions
             var ext = (RNetExtension)Activator.CreateInstance(typeof(T), _workers);
             _extensions.Add(ext);
         }
+
+        public void OnThreadRegistered(ThreadType threadType)
+        {
+            foreach (var ext in _extensions)
+            {
+                ext.OnThreadRegistered(threadType);
+            }
+        }
+
+
 
         public void OnSocketConnect(ThreadType threadType, Connection connection)
         {
@@ -46,6 +57,7 @@ namespace RapidNet.Extensions
 
         public bool OnSocketReceive(ThreadType threadType, Connection connection, ushort messageID, IntPtr messageData)
         {
+
             foreach( var ext in _extensions)
             {
                 if(ext.OnSocketReceive(threadType, connection, messageID, messageData) == true)
@@ -55,6 +67,19 @@ namespace RapidNet.Extensions
             }
             return false;
         }
+
+        public bool CheckInterceptMessage(ushort messageID, BitBuffer buffer)
+        {
+            foreach(var ext in _extensions)
+            {
+                if(ext.CheckInterceptMessage(messageID, buffer) == true)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
 
         public void OnThreadEventReceived(ThreadType threadType, ushort id, IntPtr eventData)
         {

@@ -5,7 +5,7 @@ namespace RapidNet.Threading.ThreadEvents
 {
     internal struct DeserializeNetworkMessageThreadEvent
     {
-        public uint sender;
+        public ushort sender;
         public NativeString ip;
         public ushort port;
         public Packet packet;

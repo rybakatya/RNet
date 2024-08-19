@@ -1,4 +1,5 @@
 using RapidNet.Connections;
+using RapidNet.Serialization;
 using System;
 using System.Collections;
 
@@ -30,6 +31,9 @@ namespace RapidNet.Extensions
         /// <param name="threadType">The thread that this method was called on.</param>
         /// <param name="connection">The connection that has connected.</param>
         public abstract void OnSocketConnect(ThreadType threadType, Connection connection);
+
+        public abstract bool CheckInterceptMessage(ushort messageID, IntPtr message, BitBuffer buffer);
+        public abstract void OnThreadRegistered(ThreadType threadType);
 
 
         /// <summary>

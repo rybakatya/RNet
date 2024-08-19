@@ -127,7 +127,7 @@ namespace RapidNet.Workers
                     peers.Add(e.Peer.ID, e.Peer);
                     workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendConnection, new SendConnectionDataThreadEvent()
                     {
-                        id = e.Peer.ID,
+                        id = (ushort)e.Peer.ID,
                         ip = new NativeString(e.Peer.IP),
                         port = e.Peer.Port
                     });
@@ -148,7 +148,7 @@ namespace RapidNet.Workers
                     workers.logicWorker.Enqueue((ushort)WorkerThreadEventID.SendDeserializeNetworkMessage, new DeserializeNetworkMessageThreadEvent()
                     {
                         packet = e.Packet,
-                        sender = e.Peer.ID,
+                        sender = (ushort)e.Peer.ID,
                         ip = new NativeString(e.Peer.IP.ToString()),
                         port = e.Peer.Port,
                         bytesReceived = e.Peer.BytesReceived,
@@ -179,7 +179,7 @@ namespace RapidNet.Workers
 
         
 
-        internal override void OnConsume(ushort eventID, IntPtr data)
+        public override void OnConsume(ushort eventID, IntPtr data)
         {
 
             switch (eventID)
@@ -229,6 +229,11 @@ namespace RapidNet.Workers
                         }
                     }
                     
+                    break;
+
+                case WorkerThreadEventID.SendRegisterThreadEvent:
+
+                    _extensionManager.OnThreadRegistered(ThreadType.Network);
                     break;
 
                 default:

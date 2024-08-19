@@ -2,7 +2,7 @@
 {
     internal struct SendConnectionDataThreadEvent
     {
-        public uint id;
+        public ushort id;
         public NativeString ip;
         public ushort port;
     }

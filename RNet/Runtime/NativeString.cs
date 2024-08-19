@@ -8,9 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace RapidNet
 {
-    /// <summary>
-    /// An unmanaged class used to represnt string in a blittable way.
-    /// </summary>
+    
     public unsafe struct NativeString
     {
         internal int length;

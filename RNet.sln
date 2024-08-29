@@ -12,9 +12,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ENet", "ENet\ENet.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RNet", "RNet\RNet.csproj", "{F0567100-4DC8-4199-9D4A-900C7CC76521}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestServer", "TestServer\TestServer.csproj", "{6F57B29E-A2E2-42C9-BFAE-FF2D1ACC5250}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestServer", "TestServer\TestServer.csproj", "{68543984-EBFE-46A2-BD5A-6703DC387F76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\TestClient.csproj", "{67ED1589-1C8D-455F-9812-3DB93A4A73D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\TestClient.csproj", "{22AB7E5F-DD99-40C6-ACBB-918265FBE918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,11 +30,12 @@ Global
 		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ClientDebug|x64.Build.0 = ClientDebug|x64
 		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
 		{F0567100-4DC8-4199-9D4A-900C7CC76521}.ServerDebug|x64.Build.0 = ServerDebug|x64
-		{6F57B29E-A2E2-42C9-BFAE-FF2D1ACC5250}.ClientDebug|x64.ActiveCfg = ServerDebug|x64
-		{6F57B29E-A2E2-42C9-BFAE-FF2D1ACC5250}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
-		{6F57B29E-A2E2-42C9-BFAE-FF2D1ACC5250}.ServerDebug|x64.Build.0 = ServerDebug|x64
-		{67ED1589-1C8D-455F-9812-3DB93A4A73D5}.ClientDebug|x64.ActiveCfg = ClientDebug|x64
-		{67ED1589-1C8D-455F-9812-3DB93A4A73D5}.ServerDebug|x64.ActiveCfg = ClientDebug|x64
+		{68543984-EBFE-46A2-BD5A-6703DC387F76}.ClientDebug|x64.ActiveCfg = ServerDebug|x64
+		{68543984-EBFE-46A2-BD5A-6703DC387F76}.ServerDebug|x64.ActiveCfg = ServerDebug|x64
+		{68543984-EBFE-46A2-BD5A-6703DC387F76}.ServerDebug|x64.Build.0 = ServerDebug|x64
+		{22AB7E5F-DD99-40C6-ACBB-918265FBE918}.ClientDebug|x64.ActiveCfg = ClientDebug|x64
+		{22AB7E5F-DD99-40C6-ACBB-918265FBE918}.ClientDebug|x64.Build.0 = ClientDebug|x64
+		{22AB7E5F-DD99-40C6-ACBB-918265FBE918}.ServerDebug|x64.ActiveCfg = ClientDebug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

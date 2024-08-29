@@ -1,10 +1,7 @@
-﻿using RapidNet.Extensions;
-using RapidNet.Logging;
-
-using RapidNet.Serialization;
+﻿using RapidNet.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+
 
 
 
@@ -15,13 +12,13 @@ namespace RapidNet.Connections
     {
       
         private WorkerCollection workers;
-        Dictionary<uint, Connection> connections = new Dictionary<uint, Connection>();
+        Dictionary<uint, Connection> connections;
 
-        private readonly ExtensionManager _extensionManager;
-        internal ConnectionHandler(WorkerCollection wrk, ExtensionManager extensionManager)
+        
+        internal ConnectionHandler(WorkerCollection wrk, ushort maxPlayers)
         {
             workers = wrk; 
-            _extensionManager = extensionManager;
+            connections = new Dictionary<uint, Connection>(maxPlayers);
         }
 
 
@@ -46,7 +43,7 @@ namespace RapidNet.Connections
             var c = Connection.Create(peerID, ip, port);
 
 
-            _extensionManager.OnSocketConnect(ThreadType.Logic, c);
+            
 
             connections.Add(peerID, c);
 
@@ -61,7 +58,7 @@ namespace RapidNet.Connections
 
         internal void HandleDisconnect(uint peer)
         {
-            _extensionManager.OnSocketDisconnect(ThreadType.Logic, GetConnection(peer));
+            
             bool value = false;
             if (workers.logicWorker.onSocketDisconnect != null)
                 value = workers.logicWorker.onSocketDisconnect(connections[peer]);
@@ -76,7 +73,7 @@ namespace RapidNet.Connections
 
         internal void HandleTimeout(uint peer)
         {
-            _extensionManager.OnSocketTimeout(ThreadType.Logic, GetConnection(peer));
+           
 
             bool value = false;
             if (workers.logicWorker.onSocketTimeout != null)

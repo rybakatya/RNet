@@ -1,7 +1,6 @@
 ﻿using System;
 using ENet;
 using RapidNet.Connections;
-using RapidNet.Extensions;
 using RapidNet.Logging;
 using RapidNet.Memory;
 using RapidNet.Serialization;
@@ -20,7 +19,7 @@ namespace RapidNet
 
         private static Action onInit;
         private static bool isInit;
-        private static ExtensionManager extensionManager;
+        
 
        
         private static ulong bytesSent;
@@ -93,8 +92,8 @@ namespace RapidNet
 #endif
             }
 
-            extensionManager = new ExtensionManager(workers);
-            workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers, extensionManager);
+            
+            workers.socketWorker = new SocketWorkerThread(OnSocketInit, workers);
             workers.socketWorker.StartThread(20);
             onInit += initAction;
 
@@ -118,15 +117,6 @@ namespace RapidNet
         }
 
 
-        /// <summary>
-        /// Registers an RNet extension to be loaded, needs to be called prior to RNet.InitializeServer or RNet.InitializeClient.
-        /// </summary>
-        /// <typeparam name="T">The type inheriting from RNetExtension</typeparam>
-        public static void RegisterExtension<T>() where T : RNetExtension
-        {
-            extensionManager.LoadExtension<T>();
-        }
-
 
         /// <summary>
         /// Called once per frame to keep main thread events flowing from logic thread.
@@ -149,7 +139,7 @@ namespace RapidNet
         {       
             Logger.Log(LogLevel.Info, "Network Thread Initialized!");
             
-            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers, extensionManager);
+            workers.logicWorker = new LogicWorkerThread(OnLogicInit, workers);
             workers.logicWorker.StartThread(20);
         }
 
@@ -157,7 +147,7 @@ namespace RapidNet
         {
             Logger.Log(LogLevel.Info, "Logic Thread Initialized!");
 
-            workers.gameWorker = new GameWorker(onGameInit, workers, extensionManager);
+            workers.gameWorker = new GameWorker(onGameInit, workers);
             workers.gameWorker.shouldRun = true;
             
         }
@@ -176,7 +166,7 @@ namespace RapidNet
 
             workers.socketWorker.Enqueue(WorkerThreadEventID.SendRegisterThreadEvent);
             workers.logicWorker.Enqueue(WorkerThreadEventID.SendRegisterThreadEvent);
-            extensionManager.OnThreadRegistered(ThreadType.Game);
+          
         }
 
         
@@ -201,6 +191,8 @@ namespace RapidNet
             serverInit.maxChannels = maxChannels;
             serverInit.maxConnections = maxConnections;
 
+
+            workers.logicWorker.Enqueue(WorkerThreadEventID.SendMaxConnections, maxConnections);
             workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendInitializeServer, serverInit);
         }
 

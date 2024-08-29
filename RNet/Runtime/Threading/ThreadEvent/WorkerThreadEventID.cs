@@ -12,4 +12,5 @@
     public const ushort SendDisconnectionFromPeers = ushort.MaxValue - 9;
     public const ushort SendSerializeMessageEvent = ushort.MaxValue - 10;
     public const ushort SendRegisterThreadEvent = ushort.MaxValue - 11;
+    public const ushort SendMaxConnections = ushort.MaxValue - 12;
 }

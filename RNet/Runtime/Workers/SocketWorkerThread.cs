@@ -6,7 +6,7 @@ using RapidNet.Threading.ThreadEvents;
 using RapidNet.Logging;
 using System.Collections.Generic;
 using RapidNet.Memory;
-using RapidNet.Extensions;
+
 
 
 
@@ -20,18 +20,18 @@ namespace RapidNet.Workers
         private WorkerCollection workers;
 
         private Host enetHost;
-        private readonly ExtensionManager _extensionManager;
+        
         int test;
 
         internal Action onInit;
 
         internal Dictionary<uint, Peer> peers = new Dictionary<uint, Peer>();
 
-        internal SocketWorkerThread(Action initCallback, WorkerCollection wrk, ExtensionManager extensionManager)
+        internal SocketWorkerThread(Action initCallback, WorkerCollection wrk)
         {
             onInit += initCallback;
             workers = wrk;
-            _extensionManager = extensionManager;
+            
            
         }
 
@@ -84,7 +84,7 @@ namespace RapidNet.Workers
         private void InitializeENetClient(byte channelLimit)
         {
             enetHost = new Host();
-            enetHost.Create(2048, channelLimit);
+            enetHost.Create(12, channelLimit);
            
         }
 #endif
@@ -231,15 +231,7 @@ namespace RapidNet.Workers
                     
                     break;
 
-                case WorkerThreadEventID.SendRegisterThreadEvent:
-
-                    _extensionManager.OnThreadRegistered(ThreadType.Network);
-                    break;
-
-                default:
-                    _extensionManager.OnThreadEventReceived(ThreadType.Network, eventID, data);
-                    break;
-
+                
             }
         }
 

@@ -10,9 +10,6 @@ namespace RapidNet.Connections
     public struct Connection : IEquatable<Connection>
     {
         private ushort peer;
-        
-
-
         private ulong bytesSent;
         private ulong bytesReceived;
         private NativeString ipAddress;
@@ -58,8 +55,7 @@ namespace RapidNet.Connections
         }
         internal Connection(ushort p, NativeString ip, ushort prt)
         {
-            peer = p;
-            
+            peer = p;            
             bytesSent = 0;
             bytesReceived = 0;
             ipAddress = ip;
@@ -69,8 +65,6 @@ namespace RapidNet.Connections
             mtu = 0;
             packetsSent = 0;
             packetsLost = 0;
-
-
             port = prt;
 
         }
@@ -79,9 +73,6 @@ namespace RapidNet.Connections
         private Connection(Connection con)
         {
             peer = con.peer;
-            
-
-
             bytesSent = con.bytesSent;
             bytesReceived = con.bytesReceived;
             ipAddress = con.ipAddress;

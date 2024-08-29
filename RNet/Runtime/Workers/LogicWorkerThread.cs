@@ -11,8 +11,6 @@ using RapidNet.Threading.ThreadEvents;
 using RapidNet.Memory;
 using System.Diagnostics;
 
-using RapidNet.Extensions;
-
 namespace RapidNet.Workers
 {
 
@@ -74,15 +72,15 @@ namespace RapidNet.Workers
 
         private Stopwatch stopWatch;
 
-        private readonly ExtensionManager _extensionManager;
-        internal LogicWorkerThread(Action logicInitAction, WorkerCollection wrk, ExtensionManager extensionManager)
+        
+        internal LogicWorkerThread(Action logicInitAction, WorkerCollection wrk)
         {
 
            
             workers = wrk;
 
-            onLogicInit += logicInitAction;     
-            _extensionManager = extensionManager;
+            onLogicInit += logicInitAction;
+            
             
         }
 
@@ -122,13 +120,17 @@ namespace RapidNet.Workers
         protected override void Init()
         {
             shouldRun = true;
+#if CLIENT
+
+            connectionHandler = new ConnectionHandler(workers, 12);
+#endif
 
             packetFree += onPacketFree;
             while(workers == null)
             {
                 Console.WriteLine("Waiting for main thread");
             }
-            connectionHandler = new ConnectionHandler(workers, _extensionManager);
+            
             GetAllSerializers();
             stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -179,14 +181,12 @@ namespace RapidNet.Workers
                     DeserializeIncomingMessage(MemoryHelper.Read<DeserializeNetworkMessageThreadEvent>(data));
                     break;
 
-                case WorkerThreadEventID.SendRegisterThreadEvent:
-
-                    _extensionManager.OnThreadRegistered(ThreadType.Logic);
+                case WorkerThreadEventID.SendMaxConnections:
+                    connectionHandler = new ConnectionHandler(workers, MemoryHelper.Read<ushort>(data));
                     break;
 
-                default:
-                    _extensionManager.OnThreadEventReceived(ThreadType.Logic, eventID, data);
-                    break;
+
+
 
 
 
@@ -208,30 +208,26 @@ namespace RapidNet.Workers
             var msgID = buffer.ReadUShort();
             Logger.Log(LogLevel.Info, "Packet received on logic thread, deserializing msg  id " + msgID);
 
-            if (_extensionManager.CheckInterceptMessage(msgID, buffer) == false)
+            
+
+            var ptr = serializers[msgID].Deserialize(buffer);
+            bool value = false;
+
+            if (onSocketReceive != null)
+                value = onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
+
+            if (value == false)
             {
-
-                var ptr = serializers[msgID].Deserialize(buffer);
-
-                bool value = _extensionManager.OnSocketReceive(ThreadType.Logic, connectionHandler.GetConnection(data.sender), msgID, ptr);
-
-                if (value == false)
+                var msgData = new NetworkMessageDataThreadEvent()
                 {
-                    if (onSocketReceive != null)
-                        value = onSocketReceive(connectionHandler.GetConnection(data.sender), msgID, ptr);
-
-                    if (value == false)
-                    {
-                        var msgData = new NetworkMessageDataThreadEvent()
-                        {
-                            messageID = msgID,
-                            messageData = ptr,
-                            sender = connectionHandler.GetConnection(data.sender)
-                        };
-                        workers.gameWorker.Enqueue(WorkerThreadEventID.SendNetworkMessageToGameThread, msgData);
-                    }
-                }
+                    messageID = msgID,
+                    messageData = ptr,
+                    sender = connectionHandler.GetConnection(data.sender)
+                };
+                workers.gameWorker.Enqueue(WorkerThreadEventID.SendNetworkMessageToGameThread, msgData);
             }
+           
+            
 
             
 

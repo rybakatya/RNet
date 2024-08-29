@@ -48,7 +48,7 @@ namespace RapidNet.Threading
             {
                 Consume();
                 Tick();
-                Thread.Sleep(20);
+
                 
             }
             

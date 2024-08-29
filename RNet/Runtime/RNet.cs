@@ -244,7 +244,7 @@ namespace RapidNet
         }
 
 
-        public static void SendMessage<T>(uint target, ushort messageID, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
+        public static void SendMessage<T>(uint target, ushort messageID, ushort length, byte channel, PacketFlags flags, T message) where T : unmanaged, IMessageObject
         {
             var ptr = MemoryHelper.Write(message);
 
@@ -253,6 +253,7 @@ namespace RapidNet
             {
                 target = target,
                 id = messageID,
+                length = length,
                 messageObjectPointer = ptr,
                 channel = channel,
                 flags = flags | PacketFlags.NoAllocate
@@ -268,9 +269,9 @@ namespace RapidNet
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="channel">Channel to send the message on.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void SendUnreliable<T>(Connection target, ushort messageID, byte channel, T message) where T : unmanaged, IMessageObject
+        public static void SendUnreliable<T>(Connection target, ushort messageID, ushort length, byte channel, T message) where T : unmanaged, IMessageObject
         {
-            SendMessage(target.ID, messageID, channel, PacketFlags.None, message);
+            SendMessage(target.ID, messageID, length, channel, PacketFlags.None, message);
         }
 
         /// <summary>
@@ -280,10 +281,10 @@ namespace RapidNet
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="message">MessageObject to send.</param>
 
-        public static void SendUnreliable<T>(Connection target, ushort messageID, T message) where T : unmanaged, IMessageObject
+        public static void SendUnreliable<T>(Connection target, ushort messageID, ushort length, T message) where T : unmanaged, IMessageObject
         {
 
-            SendMessage(target.ID, messageID, 237, PacketFlags.None, message);
+            SendMessage(target.ID, messageID, length, 237, PacketFlags.None, message);
         }
 
 
@@ -294,9 +295,9 @@ namespace RapidNet
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="channel">Channel to send the message on.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void SendReliable<T>(Connection target, ushort messageID, byte channel, T message) where T : unmanaged, IMessageObject
+        public static void SendReliable<T>(Connection target, ushort messageID, ushort length, byte channel, T message) where T : unmanaged, IMessageObject
         {
-            SendMessage(target.ID, messageID, channel, PacketFlags.Reliable, message);
+            SendMessage(target.ID, messageID, length, channel, PacketFlags.Reliable, message);
         }
 
         /// <summary>
@@ -305,9 +306,9 @@ namespace RapidNet
         /// <param name="target">Target connection to send the message to.</param>
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void SendReliable<T>(Connection target, ushort messageID, T message) where T : unmanaged, IMessageObject
+        public static void SendReliable<T>(Connection target, ushort messageID, ushort length, T message) where T : unmanaged, IMessageObject
         {
-            SendReliable(target, messageID, 238, message);
+            SendReliable(target, messageID, length, 238, message);
         }
 
         /// <summary>
@@ -316,9 +317,9 @@ namespace RapidNet
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="channel">Channel to send the message on.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void BroadcastReliable<T>(ushort messageID, byte channel, T message) where T : unmanaged, IMessageObject
+        public static void BroadcastReliable<T>(ushort messageID, ushort length, byte channel, T message) where T : unmanaged, IMessageObject
         {
-            SendMessage(uint.MaxValue, messageID, channel, PacketFlags.Reliable, message);
+            SendMessage(uint.MaxValue, messageID, length, channel, PacketFlags.Reliable, message);
         }
 
 
@@ -327,9 +328,9 @@ namespace RapidNet
         /// </summary>
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void BroadcastReliable<T>(ushort messageID, T message) where T : unmanaged, IMessageObject
+        public static void BroadcastReliable<T>(ushort messageID, ushort length, T message) where T : unmanaged, IMessageObject
         {
-            BroadcastReliable(messageID, 239, message);
+            BroadcastReliable(messageID, length, 239, message);
         }
 
 
@@ -339,9 +340,9 @@ namespace RapidNet
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="channel">Channel to send the message on.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void BroadcastUnreliable<T>(ushort messageID, byte channel, T message) where T : unmanaged, IMessageObject
+        public static void BroadcastUnreliable<T>(ushort messageID, ushort length, byte channel, T message) where T : unmanaged, IMessageObject
         {
-            SendMessage(uint.MaxValue, messageID, channel, PacketFlags.None, message);
+            SendMessage(uint.MaxValue, messageID, length, channel, PacketFlags.None, message);
         }
 
 
@@ -350,9 +351,9 @@ namespace RapidNet
         /// </summary>
         /// <param name="messageID">MessageID of the messasge being sent.</param>
         /// <param name="message">MessageObject to send.</param>
-        public static void BroadcastUnreliable<T>(ushort messageID, T message) where T : unmanaged, IMessageObject
+        public static void BroadcastUnreliable<T>(ushort messageID, ushort length, T message) where T : unmanaged, IMessageObject
         {
-            BroadcastUnreliable(messageID, 240, message);
+            BroadcastUnreliable(messageID, length, 240, message);
         }
 
 

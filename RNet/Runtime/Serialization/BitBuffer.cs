@@ -1,5 +1,7 @@
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 #if ENABLE_MONO || ENABLE_IL2CPP
@@ -8,10 +10,14 @@ using System.Text;
 
 namespace RapidNet.Serialization
 {
-    /// <summary>
-    /// Class used to write values to a buffer that can be converted to a span  of bytes to send over the network. Can also read data from a span of bytes.
-    /// </summary>
-    public class BitBuffer
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BitBufferData
+    {
+        public int readPosition;
+        public int nextPosition;
+        public uint[] chunks;
+    }
+    public static class BitBuffer
     {
         private const int defaultCapacity = 375; // 375 * 4 = 1500 bytes
         private const int stringLengthBits = 8;
@@ -19,53 +25,44 @@ namespace RapidNet.Serialization
         private const int bitsASCII = 7;
         private const int growFactor = 2;
         private const int minGrow = 1;
-        private int readPosition;
-        private int nextPosition;
-        private uint[] chunks;
 
-        /// <summary>
-        /// Creates a new buffer, each bucket of the buffer is 4 bytes meaning passing 375 as the numberOfBuckets will create a buffer that can hold 1500 bytes of data.
-        /// </summary>
-        /// <param name="numberOfBuckets">Number of buffer buckets</param>
-        public BitBuffer(int numberOfBuckets = defaultCapacity)
+
+        private static RapidNet.Buffers.ArrayPool<uint> bits = Buffers.ArrayPool<uint>.Create(2048, 32);
+        public static BitBufferData Create(int  length)
         {
-            readPosition = 0;
-            nextPosition = 0;
-            chunks = new uint[numberOfBuckets];
+            return new BitBufferData()
+            {
+                readPosition = 0,
+                nextPosition = 0,
+                chunks = bits.Rent(length)
+            };
         }
-       
+        
+        public static void Destroy(ref BitBufferData buffer)
+        {
+            bits.Return(buffer.chunks, true);
+        }
 
         /// <summary>
         /// Returns the length of the buffer in bytes.
         /// </summary>
-        public int Length
+        public static int GetLength(ref  BitBufferData buffer) 
         {
-            get
-            {
-                return (nextPosition - 1 >> 3) + 1;
-            }
+            return (buffer.nextPosition - 1 >> 3) + 1;
+            
         }
 
-        /// <summary>
-        /// returns true if buffer is finished reading or writing.
-        /// </summary>
-        public bool IsFinished
-        {
-            get
-            {
-                return nextPosition == readPosition;
-            }
-        }
+        
 
 
         /// <summary>
         /// clears all data from the buffer.
         /// </summary>
         [MethodImpl(256)]
-        public void Clear()
+        public static void Clear(ref BitBufferData  buffer)
         {
-            readPosition = 0;
-            nextPosition = 0;
+            buffer.readPosition = 0;
+            buffer.nextPosition = 0;
         }
 
 
@@ -76,24 +73,22 @@ namespace RapidNet.Serialization
         /// <param name="value"></param>
         
         [MethodImpl(256)]
-        public BitBuffer Add(int numBits, uint value)
+        public static void Add(ref BitBufferData buffer, int numBits, uint value)
         {
 
-            int index = nextPosition >> 5;
-            int used = nextPosition & 0x0000001F;
+            int index = buffer.nextPosition >> 5;
+            int used = buffer.nextPosition & 0x0000001F;
 
-            if (index + 1 >= chunks.Length)
-                ExpandArray();
+            if (index + 1 >= buffer.chunks.Length)
+                ExpandArray(ref buffer);
 
             ulong chunkMask = (1UL << used) - 1;
-            ulong scratch = chunks[index] & chunkMask;
+            ulong scratch = buffer.chunks[index] & chunkMask;
             ulong result = scratch | (ulong)value << used;
 
-            chunks[index] = (uint)result;
-            chunks[index + 1] = (uint)(result >> 32);
-            nextPosition += numBits;
-
-            return this;
+            buffer.chunks[index] = (uint)result;
+            buffer.chunks[index + 1] = (uint)(result >> 32);
+            buffer.nextPosition += numBits;
         }
 
 
@@ -103,11 +98,11 @@ namespace RapidNet.Serialization
         /// <param name="numBits"></param>
         /// <returns>Value read from the buffer</returns>
         [MethodImpl(256)]
-        public uint Read(int numBits)
+        public static uint Read(ref BitBufferData buffer, int numBits)
         {
-            uint result = Peek(numBits);
+            uint result = Peek(ref buffer, numBits);
 
-            readPosition += numBits;
+            buffer.readPosition += numBits;
 
             return result;
         }
@@ -119,18 +114,18 @@ namespace RapidNet.Serialization
         /// <param name="numBits"></param>
         /// <returns>Value peeked from the buffer</returns>
         [MethodImpl(256)]
-        public uint Peek(int numBits)
+        public static uint Peek(ref BitBufferData buffer, int numBits)
         {
 
 
-            int index = readPosition >> 5;
-            int used = readPosition & 0x0000001F;
+            int index = buffer.readPosition >> 5;
+            int used = buffer.readPosition & 0x0000001F;
 
             ulong chunkMask = (1UL << numBits) - 1 << used;
-            ulong scratch = chunks[index];
+            ulong scratch = buffer.chunks[index];
 
-            if (index + 1 < chunks.Length)
-                scratch |= (ulong)chunks[index + 1] << 32;
+            if (index + 1 < buffer.chunks.Length)
+                scratch |= (ulong)buffer.chunks[index + 1] << 32;
 
             ulong result = (scratch & chunkMask) >> used;
 
@@ -143,17 +138,17 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="data">array to store the buffer data into.</param>
         /// <returns>array length</returns>
-        public int ToArray(byte[] data)
+        public static int ToArray(ref BitBufferData buffer, byte[] data)
         {
-            Add(1, 1);
+            Add(ref buffer, 1, 1);
 
-            int numChunks = (nextPosition >> 5) + 1;
+            int numChunks = (buffer.nextPosition >> 5) + 1;
             int length = data.Length;
 
             for (int i = 0; i < numChunks; i++)
             {
                 int dataIdx = i * 4;
-                uint chunk = chunks[i];
+                uint chunk = buffer.chunks[i];
 
                 if (dataIdx < length)
                     data[dataIdx] = (byte)chunk;
@@ -168,7 +163,7 @@ namespace RapidNet.Serialization
                     data[dataIdx + 3] = (byte)(chunk >> 24);
             }
 
-            return Length;
+            return GetLength(ref buffer);
         }
 
 
@@ -177,12 +172,12 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
-        public void FromArray(byte[] data, int length)
+        public static void FromArray(ref BitBufferData buffer, byte[] data, int length)
         {
             int numChunks = length / 4 + 1;
 
-            if (chunks.Length < numChunks)
-                chunks = new uint[numChunks];
+            if (buffer.chunks.Length < numChunks)
+                buffer.chunks = new uint[numChunks];
 
             for (int i = 0; i < numChunks; i++)
             {
@@ -201,13 +196,13 @@ namespace RapidNet.Serialization
                 if (dataIdx + 3 < length)
                     chunk = chunk | (uint)data[dataIdx + 3] << 24;
 
-                chunks[i] = chunk;
+                buffer.chunks[i] = chunk;
             }
 
             int positionInByte = FindHighestBitPosition(data[length - 1]);
 
-            nextPosition = (length - 1) * 8 + (positionInByte - 1);
-            readPosition = 0;
+            buffer.nextPosition = (length - 1) * 8 + (positionInByte - 1);
+            buffer.readPosition = 0;
         }
 
         /// <summary>
@@ -215,15 +210,15 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="data"></param>
         /// <returns>Length of the span.</returns>
-        public int ToSpan(ref Span<byte> data) {
-            Add(1, 1);
+        public static int ToSpan(ref BitBufferData buffer, ref Span<byte> data) {
+            Add(ref buffer, 1, 1);
 
-            int numChunks = (nextPosition >> 5) + 1;
+            int numChunks = (buffer.nextPosition >> 5) + 1;
             int length = data.Length;
 
             for (int i = 0; i < numChunks; i++) {
                 int dataIdx = i * 4;
-                uint chunk = chunks[i];
+                uint chunk = buffer.chunks[i];
 
                 if (dataIdx < length)
                     data[dataIdx] = (byte)(chunk);
@@ -238,7 +233,7 @@ namespace RapidNet.Serialization
                     data[dataIdx + 3] = (byte)(chunk >> 24);
             }
 
-            return Length;
+            return GetLength(ref buffer);
         }
 
         /// <summary>
@@ -246,12 +241,12 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
-		public void FromSpan(ref ReadOnlySpan<byte> data, int length) 
+		public static void FromSpan(ref BitBufferData buffer, ref ReadOnlySpan<byte> data, int length) 
         {
 				int numChunks = (length / 4) + 1;
 
-				if (chunks.Length < numChunks)
-					chunks = new uint[numChunks];
+				if (buffer.chunks.Length < numChunks)
+					buffer.chunks = new uint[numChunks];
 
 				for (int i = 0; i < numChunks; i++) {
 					int dataIdx = i * 4;
@@ -269,13 +264,13 @@ namespace RapidNet.Serialization
 					if (dataIdx + 3 < length)
 						chunk = chunk | (uint)data[dataIdx + 3] << 24;
 
-					chunks[i] = chunk;
+					buffer.chunks[i] = chunk;
 				}
 
 				int positionInByte = FindHighestBitPosition(data[length - 1]);
 
-				nextPosition = ((length - 1) * 8) + (positionInByte - 1);
-				readPosition = 0;
+				buffer.nextPosition = ((length - 1) * 8) + (positionInByte - 1);
+				buffer.readPosition = 0;
 			}
 
 
@@ -285,11 +280,9 @@ namespace RapidNet.Serialization
         /// <param name="value">value to add to the buffer</param>
 
         [MethodImpl(256)]
-        public BitBuffer AddBool(bool value)
+        public static void AddBool(ref BitBufferData buffer, bool value)
         {
-            Add(1, value ? 1U : 0U);
-
-            return this;
+            Add(ref buffer, 1, value ? 1U : 0U);
         }
 
 
@@ -298,9 +291,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>value read from the buffer</returns>
         [MethodImpl(256)]
-        public bool ReadBool()
+        public static bool ReadBool(ref BitBufferData buffer)
         {
-            return Read(1) > 0;
+            return Read(ref buffer, 1) > 0;
         }
 
         /// <summary>
@@ -308,9 +301,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns></returns>
         [MethodImpl(256)]
-        public bool PeekBool()
+        public static bool PeekBool(ref BitBufferData buffer)
         {
-            return Peek(1) > 0;
+            return Peek(ref buffer, 1) > 0;
         }
 
 
@@ -320,11 +313,9 @@ namespace RapidNet.Serialization
         /// <param name="value">the value to add to the buffer</param>
         /// <returns>value peeked from the buffer</returns>
         [MethodImpl(256)]
-        public BitBuffer AddByte(byte value)
+        public static void AddByte(ref BitBufferData buffer, byte value)
         {
-            Add(8, value);
-
-            return this;
+            Add(ref buffer, 8, value);
         }
 
 
@@ -333,9 +324,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>value read from the buffer</returns>
         [MethodImpl(256)]
-        public byte ReadByte()
+        public static byte ReadByte(ref BitBufferData buffer)
         {
-            return (byte)Read(8);
+            return (byte)Read(ref buffer, 8);
         }
 
 
@@ -344,9 +335,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>byte peeked from the buffer</returns>
         [MethodImpl(256)]
-        public byte PeekByte()
+        public static byte PeekByte(ref BitBufferData buffer)
         {
-            return (byte)Peek(8);
+            return (byte)Peek(ref buffer, 8);
         }
 
         /// <summary>
@@ -356,11 +347,9 @@ namespace RapidNet.Serialization
         /// <returns></returns>
 
         [MethodImpl(256)]
-        public BitBuffer AddShort(short value)
+        public static void AddShort(ref BitBufferData buffer, short value)
         {
-            AddInt(value);
-
-            return this;
+            AddInt(ref buffer, value);
         }
 
 
@@ -369,9 +358,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>the value read from the buffer</returns>
         [MethodImpl(256)]
-        public short ReadShort()
+        public static short ReadShort(ref BitBufferData buffer)
         {
-            return (short)ReadInt();
+            return (short)ReadInt(ref buffer);
         }
 
 
@@ -380,9 +369,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>the value peeked from the buffer</returns>
         [MethodImpl(256)]
-        public short PeekShort()
+        public static short PeekShort(ref BitBufferData buffer)
         {
-            return (short)PeekInt();
+            return (short)PeekInt(ref buffer);
         }
 
 
@@ -391,11 +380,10 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="value">The value to add to the buffer.</param>
         [MethodImpl(256)]
-        public BitBuffer AddUShort(ushort value)
+        public static void AddUShort(ref BitBufferData buffer, ushort value)
         {
-            AddUInt(value);
+            AddUInt(ref buffer, value);
 
-            return this;
         }
 
         /// <summary>
@@ -403,9 +391,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>the value read from the buffer.</returns>
         [MethodImpl(256)]
-        public ushort ReadUShort()
+        public static ushort ReadUShort(ref BitBufferData buffer)
         {
-            return (ushort)ReadUInt();
+            return (ushort)ReadUInt(ref buffer);
         }
 
         /// <summary>
@@ -413,9 +401,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>the value peeked from the buffer.</returns>
         [MethodImpl(256)]
-        public ushort PeekUShort()
+        public static ushort PeekUShort(ref BitBufferData buffer)
         {
-            return (ushort)PeekUInt();
+            return (ushort)PeekUInt(ref buffer);
         }
 
         /// <summary>
@@ -423,13 +411,11 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="value">the value to add to the buffer</param>
         [MethodImpl(256)]
-        public BitBuffer AddInt(int value)
+        public static void AddInt(ref BitBufferData buffer, int value)
         {
             uint zigzag = (uint)(value << 1 ^ value >> 31);
 
-            AddUInt(zigzag);
-
-            return this;
+            AddUInt(ref buffer, zigzag);
         }
 
         /// <summary>
@@ -437,9 +423,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>the value read from the buffer.</returns>
         [MethodImpl(256)]
-        public int ReadInt()
+        public static int ReadInt(ref BitBufferData buffer)
         {
-            uint value = ReadUInt();
+            uint value = ReadUInt(ref buffer);
             int zagzig = (int)(value >> 1 ^ -(int)(value & 1));
 
             return zagzig;
@@ -451,9 +437,9 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>The value peeked from the buffer.</returns>
         [MethodImpl(256)]
-        public int PeekInt()
+        public static int PeekInt(ref BitBufferData buffer)
         {
-            uint value = PeekUInt();
+            uint value = PeekUInt(ref buffer);
             int zagzig = (int)(value >> 1 ^ -(int)(value & 1));
 
             return zagzig;
@@ -466,7 +452,7 @@ namespace RapidNet.Serialization
         /// <param name="value">The value to add to the buffer.</param>
        
         [MethodImpl(256)]
-        public BitBuffer AddUInt(uint value)
+        public static void AddUInt(ref BitBufferData data, uint value)
         {
             uint buffer = 0x0u;
 
@@ -478,12 +464,10 @@ namespace RapidNet.Serialization
                 if (value > 0)
                     buffer |= 0x80u;
 
-                Add(8, buffer);
+                Add(ref data, 8, buffer);
             }
 
             while (value > 0);
-
-            return this;
         }
 
         /// <summary>
@@ -491,7 +475,7 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>the value read from the buffer.</returns>
         [MethodImpl(256)]
-        public uint ReadUInt()
+        public static uint ReadUInt(ref BitBufferData data)
         {
             uint buffer = 0x0u;
             uint value = 0x0u;
@@ -499,7 +483,7 @@ namespace RapidNet.Serialization
 
             do
             {
-                buffer = Read(8);
+                buffer = Read(ref data, 8);
 
                 value |= (buffer & 0x7Fu) << shift;
                 shift += 7;
@@ -516,12 +500,12 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>The value peeked from the buffer.</returns>
         [MethodImpl(256)]
-        public uint PeekUInt()
+        public static uint PeekUInt(ref BitBufferData buffer)
         {
-            int tempPosition = readPosition;
-            uint value = ReadUInt();
+            int tempPosition = buffer.readPosition;
+            uint value = ReadUInt(ref buffer);
 
-            readPosition = tempPosition;
+            buffer.readPosition = tempPosition;
 
             return value;
         }
@@ -531,12 +515,10 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="value">the value to add to the buffer.</param>
         [MethodImpl(256)]
-        public BitBuffer AddLong(long value)
+        public static void  AddLong(ref BitBufferData buffer, long value)
         {
-            AddInt((int)(value & uint.MaxValue));
-            AddInt((int)(value >> 32));
-
-            return this;
+            AddInt(ref buffer, (int)(value & uint.MaxValue));
+            AddInt(ref buffer, (int)(value >> 32));
         }
 
         /// <summary>
@@ -544,10 +526,10 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>The value read from the buffer.</returns>
         [MethodImpl(256)]
-        public long ReadLong()
+        public static long ReadLong(ref BitBufferData buffer)
         {
-            int low = ReadInt();
-            int high = ReadInt();
+            int low = ReadInt(ref buffer);
+            int high = ReadInt(ref buffer);
             long value = high;
 
             return value << 32 | (uint)low;
@@ -559,12 +541,12 @@ namespace RapidNet.Serialization
         /// <returns>the value peeked from the buffer</returns>
 
         [MethodImpl(256)]
-        public long PeekLong()
+        public static long PeekLong(ref BitBufferData buffer)
         {
-            int tempPosition = readPosition;
-            long value = ReadLong();
+            int tempPosition = buffer.readPosition;
+            long value = ReadLong(ref buffer);
 
-            readPosition = tempPosition;
+            buffer.readPosition = tempPosition;
 
             return value;
         }
@@ -575,12 +557,10 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <param name="value">the value added to the buffer.</param>
         [MethodImpl(256)]
-        public BitBuffer AddULong(ulong value)
+        public static void AddULong(ref BitBufferData buffer, ulong value)
         {
-            AddUInt((uint)(value & uint.MaxValue));
-            AddUInt((uint)(value >> 32));
-
-            return this;
+            AddUInt(ref buffer, (uint)(value & uint.MaxValue));
+            AddUInt(ref buffer, (uint)(value >> 32));
         }
 
         /// <summary>
@@ -588,10 +568,10 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns>The value read from the buffer.</returns>
         [MethodImpl(256)]
-        public ulong ReadULong()
+        public static  ulong ReadULong(ref BitBufferData buffer)
         {
-            uint low = ReadUInt();
-            uint high = ReadUInt();
+            uint low = ReadUInt(ref buffer);
+            uint high = ReadUInt(ref buffer);
 
             return (ulong)high << 32 | low;
         }
@@ -601,12 +581,12 @@ namespace RapidNet.Serialization
         /// </summary>
         /// <returns></returns>
         [MethodImpl(256)]
-        public ulong PeekULong()
+        public static ulong PeekULong(ref BitBufferData buffer)
         {
-            int tempPosition = readPosition;
-            ulong value = ReadULong();
+            int tempPosition = buffer.readPosition;
+            ulong value = ReadULong(ref buffer);
 
-            readPosition = tempPosition;
+            buffer.readPosition = tempPosition;
 
             return value;
         }
@@ -615,13 +595,13 @@ namespace RapidNet.Serialization
 
        
 
-        private void ExpandArray()
+        private static void ExpandArray(ref BitBufferData buffer)
         {
-            int newCapacity = chunks.Length * growFactor + minGrow;
+            int newCapacity = buffer.chunks.Length * growFactor + minGrow;
             uint[] newChunks = new uint[newCapacity];
 
-            Array.Copy(chunks, newChunks, chunks.Length);
-            chunks = newChunks;
+            Array.Copy(buffer.chunks, newChunks, buffer.chunks.Length);
+            buffer.chunks = newChunks;
         }
 
         [MethodImpl(256)]

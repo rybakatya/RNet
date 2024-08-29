@@ -10,6 +10,7 @@ namespace RapidNet.Threading.ThreadEvents
     {
         public uint target;
         public ushort id;
+        public ushort length;
         public byte channel;
         public PacketFlags flags;
         public IntPtr messageObjectPointer;

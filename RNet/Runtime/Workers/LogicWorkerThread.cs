@@ -200,17 +200,17 @@ namespace RapidNet.Workers
         private unsafe void DeserializeIncomingMessage(DeserializeNetworkMessageThreadEvent data)
         {
             connectionHandler.SetConnection(data.sender, Connection.Create(data.sender, new NativeString(data.ip.ToString()), data.port, data.bytesSent, data.bytesReceived, data.lastReceiveTime, data.lastSendTime, data.lastRoundTripTime, data.mtu, data.packetsSent, data.packetsLost));
-            var buffer = BufferPool.GetBitBuffer();
+            var buffer = BitBuffer.Create(data.packet.Length);
 
             var span = new ReadOnlySpan<byte>(data.packet.Data.ToPointer(), data.packet.Length);
 
-            buffer.FromSpan(ref span, data.packet.Length);
-            var msgID = buffer.ReadUShort();
+            BitBuffer.FromSpan(ref buffer, ref span, data.packet.Length);
+            var msgID = BitBuffer.ReadUShort(ref buffer);
             Logger.Log(LogLevel.Info, "Packet received on logic thread, deserializing msg  id " + msgID);
 
             
 
-            var ptr = serializers[msgID].Deserialize(buffer);
+            var ptr = serializers[msgID].Deserialize(ref buffer);
             bool value = false;
 
             if (onSocketReceive != null)
@@ -234,7 +234,7 @@ namespace RapidNet.Workers
 
             data.packet.Dispose();
             data.ip.Free();
-            buffer.Clear();
+            BitBuffer.Destroy(ref buffer);
 
         }
 
@@ -243,19 +243,19 @@ namespace RapidNet.Workers
         
         private unsafe void SerializeOutgoingMessage(SerializeNetworkMessageThreadEvent data)
         {
+            var length = data.length + 2;
 
-
-            var buffer = BufferPool.GetBitBuffer();
-            buffer.AddUShort(data.id);
-            serializers[data.id].Serialize(buffer, data.messageObjectPointer);
+            var buffer = BitBuffer.Create(length);
+            BitBuffer.AddUShort(ref buffer, data.id);
+            serializers[data.id].Serialize(ref buffer, data.messageObjectPointer);
            
 
-            var ptr = Marshal.AllocHGlobal(buffer.Length * Marshal.SizeOf<byte>());
+            var ptr = Marshal.AllocHGlobal(length * Marshal.SizeOf<byte>());
             
-            var span = new Span<byte>(ptr.ToPointer(), buffer.Length);
-            buffer.ToSpan(ref span);
+            var span = new Span<byte>(ptr.ToPointer(), length);
+            BitBuffer.ToSpan(ref buffer, ref span);
             Packet packet = default(Packet);
-            packet.Create(ptr, buffer.Length, data.flags);
+            packet.Create(ptr, length, data.flags);
             packet.SetFreeCallback(packetFree);
             workers.socketWorker.Enqueue((ushort)WorkerThreadEventID.SendSerializeMessageEvent, new PackDataThreadEvent()
             {
@@ -265,8 +265,8 @@ namespace RapidNet.Workers
             });
 
             MemoryHelper.Free(data.messageObjectPointer);
-            
-            buffer.Clear();
+
+            BitBuffer.Destroy(ref buffer);
         }
         private unsafe void onPacketFree(Packet packet)
         {

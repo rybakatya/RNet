@@ -3,7 +3,7 @@
 
 namespace RapidNet
 {
-    internal struct RNetIPAddress : IEquatable<RNetIPAddress>
+    public struct RNetIPAddress : IEquatable<RNetIPAddress>
     {
         public string ip;
         public ushort port;
